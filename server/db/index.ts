@@ -14,6 +14,12 @@ sqlite.pragma('foreign_keys = ON')
 
 export const db = drizzle(sqlite, { schema })
 
+// Run migrations for new columns on existing databases
+const existingCols = sqlite.prepare("PRAGMA table_info(generated_outputs)").all() as { name: string }[]
+if (!existingCols.some(c => c.name === 'qa_score')) {
+  sqlite.exec('ALTER TABLE generated_outputs ADD COLUMN qa_score TEXT')
+}
+
 // Auto-create tables on first run
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -58,6 +64,7 @@ sqlite.exec(`
     user_id TEXT NOT NULL REFERENCES users(id),
     type TEXT NOT NULL,
     content TEXT NOT NULL,
+    qa_score TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
     admin_notes TEXT,
     approved_by TEXT,

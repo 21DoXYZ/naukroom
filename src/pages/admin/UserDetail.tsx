@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Check, AlertCircle, Clock } from 'lucide-react'
+import { ChevronLeft, Check, AlertCircle, Clock, ShieldCheck, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
@@ -16,10 +16,18 @@ interface UserRow {
   createdAt: number
 }
 
+interface QAResult {
+  score: number
+  passed: boolean
+  issues: string[]
+  rewrittenFields: Record<string, string>
+}
+
 interface Output {
   id: string
   type: string
   content: string
+  qaScore: string | null
   status: string
   adminNotes: string | null
   createdAt: number
@@ -39,6 +47,7 @@ const TYPE_LABEL: Record<string, string> = {
   lead_magnet: 'Лідмагніти',
   funnel: 'Воронка',
   content_pack: 'Контент-план',
+  marketing_pack: 'Маркетинг-пак',
 }
 
 const STATUS_CONFIG = {
@@ -55,12 +64,68 @@ const spring = {
   }),
 }
 
-function OutputCard({ output, onUpdate }: { output: Output; onUpdate: (id: string, status: string, notes: string) => void }) {
+function qaColor(score: number) {
+  if (score >= 80) return 'text-black bg-black/8'
+  if (score >= 65) return 'text-black bg-black/15'
+  return 'text-white bg-black'
+}
+
+function QABadge({ qa }: { qa: QAResult }) {
+  return (
+    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] type-mono-label ${qaColor(qa.score)}`}>
+      {qa.passed
+        ? <ShieldCheck className="h-3 w-3" />
+        : <ShieldAlert className="h-3 w-3" />
+      }
+      QA {qa.score}/100
+    </div>
+  )
+}
+
+function QADetails({ qa }: { qa: QAResult }) {
+  if (qa.passed && qa.issues.length === 0) return null
+  return (
+    <div className="mb-4 rounded-[6px] border border-black/10 p-3">
+      <p className="type-mono-label text-[rgba(0,0,0,0.4)] mb-2">
+        {qa.passed ? 'Пройшов QA' : 'Не пройшов QA'} — {qa.score}/100
+      </p>
+      {qa.issues.length > 0 && (
+        <ul className="flex flex-col gap-1 mb-3">
+          {qa.issues.map((issue, i) => (
+            <li key={i} className="type-mono-label text-[rgba(0,0,0,0.6)] flex gap-1.5">
+              <span className="shrink-0 mt-[1px]">·</span>
+              {issue}
+            </li>
+          ))}
+        </ul>
+      )}
+      {Object.keys(qa.rewrittenFields).length > 0 && (
+        <div className="border-t border-black/8 pt-3">
+          <p className="type-mono-label text-[rgba(0,0,0,0.4)] mb-2">Перероблені поля</p>
+          {Object.entries(qa.rewrittenFields).map(([field, value]) => (
+            <div key={field} className="mb-2">
+              <p className="type-mono-label text-[rgba(0,0,0,0.35)]">{field}</p>
+              <p className="type-body text-[rgba(0,0,0,0.75)]">{value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function OutputCard({ output, onUpdate }: {
+  output: Output
+  onUpdate: (id: string, status: string, notes: string) => void
+}) {
   const [expanded, setExpanded] = useState(false)
   const [notes, setNotes] = useState(output.adminNotes ?? '')
   const [saving, setSaving] = useState(false)
 
   const cfg = STATUS_CONFIG[output.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.pending
+
+  let qa: QAResult | null = null
+  try { if (output.qaScore) qa = JSON.parse(output.qaScore) } catch { /* skip */ }
 
   async function save(status: string) {
     setSaving(true)
@@ -84,7 +149,8 @@ function OutputCard({ output, onUpdate }: { output: Output; onUpdate: (id: strin
             {new Date(output.createdAt).toLocaleDateString('uk')}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {qa && <QABadge qa={qa} />}
           <span className={`type-mono-label px-2 py-0.5 rounded-[4px] flex items-center gap-1 ${cfg.bg}`}>
             <cfg.icon className="h-3 w-3" />
             {cfg.label}
@@ -97,6 +163,8 @@ function OutputCard({ output, onUpdate }: { output: Output; onUpdate: (id: strin
 
       {expanded && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-black/8 pt-4 mt-2">
+          {qa && <QADetails qa={qa} />}
+
           <div className="bg-black/[0.025] rounded-[6px] p-4 mb-4 max-h-64 overflow-y-auto">
             <pre className="text-[0.75rem] leading-[1.6] whitespace-pre-wrap break-all text-[rgba(0,0,0,0.7)] font-mono">
               {parsedContent ? JSON.stringify(parsedContent, null, 2) : output.content}
@@ -167,6 +235,14 @@ export default function AdminUserDetail() {
 
   const { user, profile, outputs } = detail
 
+  const avgQA = outputs.length
+    ? Math.round(
+        outputs.reduce((sum, o) => {
+          try { return sum + (JSON.parse(o.qaScore ?? '{}') as QAResult).score } catch { return sum + 75 }
+        }, 0) / outputs.length
+      )
+    : null
+
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-black/8">
@@ -190,7 +266,6 @@ export default function AdminUserDetail() {
         </motion.div>
 
         <div className="grid md:grid-cols-[1fr_2fr] gap-6">
-          {/* Left: user info + profile */}
           <div className="flex flex-col gap-4">
             <motion.div initial="hidden" animate="visible" variants={spring} custom={1}>
               <Card>
@@ -199,6 +274,8 @@ export default function AdminUserDetail() {
                   {[
                     { label: 'Роль', value: user.role },
                     { label: 'Онбординг', value: user.onboardingStatus },
+                    { label: 'Матеріалів', value: String(outputs.length) },
+                    ...(avgQA !== null ? [{ label: 'Середній QA', value: `${avgQA}/100` }] : []),
                     { label: 'Дата реєстрації', value: new Date(user.createdAt).toLocaleDateString('uk') },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex items-center justify-between py-1.5 border-b border-black/8 last:border-0">
@@ -232,7 +309,6 @@ export default function AdminUserDetail() {
             )}
           </div>
 
-          {/* Right: outputs */}
           <div>
             <motion.div initial="hidden" animate="visible" variants={spring} custom={2} className="mb-4">
               <p className="type-mono-label text-[rgba(0,0,0,0.4)]">

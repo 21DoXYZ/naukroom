@@ -13,6 +13,7 @@ import LeadMagnetPage from '@/pages/lead-magnet'
 import FunnelPage from '@/pages/funnel'
 import ContentPage from '@/pages/content'
 import ExportPage from '@/pages/export'
+import MarketingPackPage from '@/pages/marketing-pack'
 import Admin from '@/pages/admin'
 import AdminUserDetail from '@/pages/admin/UserDetail'
 import { Spinner } from '@/components/ui/Spinner'
@@ -64,6 +65,7 @@ function AppRoutes() {
       <Route path="/funnel" element={<RequireAuth><FunnelPage /></RequireAuth>} />
       <Route path="/content" element={<RequireAuth><ContentPage /></RequireAuth>} />
       <Route path="/export" element={<RequireAuth><ExportPage /></RequireAuth>} />
+      <Route path="/marketing-pack" element={<RequireAuth><MarketingPackPage /></RequireAuth>} />
 
       <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
       <Route path="/admin/users/:id" element={<RequireAdmin><AdminUserDetail /></RequireAdmin>} />

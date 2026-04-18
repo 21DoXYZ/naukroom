@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Download, Copy, Check, ExternalLink } from 'lucide-react'
+import { Download, Copy, Check, ExternalLink, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
@@ -23,6 +23,7 @@ const TYPE_LABEL: Record<string, string> = {
   lead_magnet: 'Лідмагніти',
   funnel: 'Воронка',
   content_pack: 'Контент-план',
+  marketing_pack: 'Маркетинг-пак',
 }
 
 const TYPE_ROUTE: Record<string, string> = {
@@ -33,6 +34,7 @@ const TYPE_ROUTE: Record<string, string> = {
   lead_magnet: '/lead-magnet',
   funnel: '/funnel',
   content_pack: '/content',
+  marketing_pack: '/marketing-pack',
 }
 
 const spring = {
@@ -95,8 +97,10 @@ export default function ExportPage() {
   }, [])
 
   const completedTypes = outputs.map(o => o.type)
+  const coreModules = ['positioning_summary', 'profile_audit', 'offer', 'profile_packaging', 'lead_magnet', 'funnel', 'content_pack']
   const allModules = Object.keys(TYPE_LABEL)
   const missingModules = allModules.filter(t => !completedTypes.includes(t))
+  const coreComplete = coreModules.every(t => completedTypes.includes(t))
 
   return (
     <div className="min-h-screen bg-white">
@@ -121,8 +125,14 @@ export default function ExportPage() {
         ) : (
           <>
             {outputs.length > 0 && (
-              <motion.div initial="hidden" animate="visible" variants={spring} custom={1} className="flex gap-3 mb-8">
-                <Button onClick={() => downloadJSON(outputs)}>
+              <motion.div initial="hidden" animate="visible" variants={spring} custom={1} className="flex flex-wrap gap-3 mb-8">
+                {coreComplete && (
+                  <Button size="lg" onClick={() => navigate('/marketing-pack')}>
+                    <Sparkles className="h-4 w-4 mr-1.5" />
+                    Зібрати Маркетинг-пак
+                  </Button>
+                )}
+                <Button variant="glass-dark" onClick={() => downloadJSON(outputs)}>
                   <Download className="h-3.5 w-3.5 mr-1.5" />
                   Завантажити JSON
                 </Button>

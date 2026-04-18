@@ -70,9 +70,11 @@ export const generatedOutputs = sqliteTable('generated_outputs', {
       'lead_magnet',
       'funnel',
       'content_pack',
+      'marketing_pack',
     ],
   }).notNull(),
   content: text('content').notNull(),         // JSON
+  qaScore: text('qa_score'),                  // JSON: QAResult
   status: text('status', { enum: ['pending', 'approved', 'needs_review'] })
     .default('pending').notNull(),
   adminNotes: text('admin_notes'),
