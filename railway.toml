@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "node --import tsx/esm server/index.ts"
+healthcheckPath = "/api/auth/me"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"

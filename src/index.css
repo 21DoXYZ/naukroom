@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource/geist-mono";
+
+@theme inline {
+  --font-sans: 'Geist Variable', 'SF Pro Display', system-ui, helvetica, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', menlo, monospace;
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-glass-dark: rgba(0, 0, 0, 0.08);
+  --color-glass-light: rgba(255, 255, 255, 0.16);
+  --color-ink-muted: rgba(0, 0, 0, 0.55);
+  --color-ink-faint: rgba(0, 0, 0, 0.35);
+
+  --radius-card: 8px;
+  --radius-pill: 50px;
+}
+
+/* Variable weight utilities */
+@utility fw-320 { font-weight: 320; }
+@utility fw-330 { font-weight: 330; }
+@utility fw-340 { font-weight: 340; }
+@utility fw-450 { font-weight: 450; }
+@utility fw-480 { font-weight: 480; }
+@utility fw-540 { font-weight: 540; }
+
+/* Typography shorthands */
+@utility type-display {
+  font-size: 4rem;
+  line-height: 1.05;
+  letter-spacing: -1.2px;
+  font-weight: 400;
+}
+@utility type-heading {
+  font-size: 2.5rem;
+  line-height: 1.10;
+  letter-spacing: -0.72px;
+  font-weight: 400;
+}
+@utility type-subheading {
+  font-size: 1.375rem;
+  line-height: 1.35;
+  letter-spacing: -0.22px;
+  font-weight: 540;
+}
+@utility type-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.55;
+  letter-spacing: -0.1px;
+  font-weight: 330;
+}
+@utility type-body {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  letter-spacing: -0.1px;
+  font-weight: 330;
+}
+@utility type-mono-label {
+  font-family: 'Geist Mono', 'SF Mono', menlo, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.30;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  font-feature-settings: "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body { margin: 0; background: #ffffff; color: #000000; }
+
+body {
+  font-family: 'Geist Variable', 'SF Pro Display', system-ui, helvetica, sans-serif;
+  font-weight: 330;
+  letter-spacing: -0.1px;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px dashed #000000;
+  outline-offset: 3px;
+}
