@@ -12,14 +12,6 @@ const sqlite = new Database(DB_PATH)
 sqlite.pragma('journal_mode = WAL')
 sqlite.pragma('foreign_keys = ON')
 
-export const db = drizzle(sqlite, { schema })
-
-// Run migrations for new columns on existing databases
-const existingCols = sqlite.prepare("PRAGMA table_info(generated_outputs)").all() as { name: string }[]
-if (!existingCols.some(c => c.name === 'qa_score')) {
-  sqlite.exec('ALTER TABLE generated_outputs ADD COLUMN qa_score TEXT')
-}
-
 // Auto-create tables on first run
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -72,3 +64,11 @@ sqlite.exec(`
     updated_at INTEGER
   );
 `)
+
+// Migrate existing databases: add qa_score if missing
+const existingCols = sqlite.prepare('PRAGMA table_info(generated_outputs)').all() as { name: string }[]
+if (!existingCols.some(c => c.name === 'qa_score')) {
+  sqlite.exec('ALTER TABLE generated_outputs ADD COLUMN qa_score TEXT')
+}
+
+export const db = drizzle(sqlite, { schema })
