@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Check, AlertCircle, Clock, ShieldCheck, ShieldAlert } from 'lucide-react'
+import { ChevronLeft, Check, AlertCircle, Clock, ShieldCheck, ShieldAlert, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
@@ -114,13 +114,15 @@ function QADetails({ qa }: { qa: QAResult }) {
   )
 }
 
-function OutputCard({ output, onUpdate }: {
+function OutputCard({ output, onUpdate, onRegenerated }: {
   output: Output
   onUpdate: (id: string, status: string, notes: string) => void
+  onRegenerated: (updated: Output) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [notes, setNotes] = useState(output.adminNotes ?? '')
   const [saving, setSaving] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
 
   const cfg = STATUS_CONFIG[output.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.pending
 
@@ -134,6 +136,22 @@ function OutputCard({ output, onUpdate }: {
       onUpdate(output.id, status, notes)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function regenerate() {
+    if (!confirm(`Перегенерувати "${TYPE_LABEL[output.type] ?? output.type}"? Поточний контент буде замінено.`)) return
+    setRegenerating(true)
+    try {
+      const res = await api.post<{ ok: boolean; output: Output }>(`/admin/outputs/${output.id}/regenerate`, {})
+      if (res.output) {
+        setNotes(res.output.adminNotes ?? '')
+        onRegenerated(res.output)
+      }
+    } catch {
+      alert('Помилка регенерації. Спробуйте ще раз.')
+    } finally {
+      setRegenerating(false)
     }
   }
 
@@ -155,6 +173,9 @@ function OutputCard({ output, onUpdate }: {
             <cfg.icon className="h-3 w-3" />
             {cfg.label}
           </span>
+          <Button variant="ghost" size="sm" onClick={regenerate} disabled={regenerating} title="Перегенерувати">
+            <RefreshCw className={`h-3.5 w-3.5 ${regenerating ? 'animate-spin' : ''}`} />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setExpanded(e => !e)}>
             {expanded ? 'Закрити' : 'Розгорнути'}
           </Button>
@@ -218,6 +239,13 @@ export default function AdminUserDetail() {
     setDetail(d => d ? {
       ...d,
       outputs: d.outputs.map(o => o.id === outputId ? { ...o, status, adminNotes: notes } : o),
+    } : null)
+  }
+
+  function handleRegenerated(updated: Output) {
+    setDetail(d => d ? {
+      ...d,
+      outputs: d.outputs.map(o => o.id === updated.id ? updated : o),
     } : null)
   }
 
@@ -323,7 +351,7 @@ export default function AdminUserDetail() {
               <div className="flex flex-col gap-3">
                 {outputs.map((o, i) => (
                   <motion.div key={o.id} initial="hidden" animate="visible" variants={spring} custom={i + 3}>
-                    <OutputCard output={o} onUpdate={handleOutputUpdate} />
+                    <OutputCard output={o} onUpdate={handleOutputUpdate} onRegenerated={handleRegenerated} />
                   </motion.div>
                 ))}
               </div>
