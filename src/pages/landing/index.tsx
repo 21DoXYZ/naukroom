@@ -46,7 +46,7 @@ export default function Landing() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white hero-gradient">
       {/* Nav */}
       <header className="border-b border-black/8 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
         <div className="max-w-5xl mx-auto px-6 h-[52px] flex items-center justify-between">
@@ -65,7 +65,7 @@ export default function Landing() {
           AI-маркетинг для health-експертів
         </motion.div>
         <motion.h1 initial="hidden" animate="visible" variants={spring} custom={1}
-          className="text-[3rem] fw-400 tracking-[-1.5px] leading-[1.08] max-w-[680px] mb-6">
+          className="text-[3.5rem] md:text-[4.5rem] fw-320 tracking-[-2px] leading-[1.05] max-w-[720px] mb-6">
           Система, яка допоможе зібрати ваш Instagram у воронку клієнтів
         </motion.h1>
         <motion.p initial="hidden" animate="visible" variants={spring} custom={2}
