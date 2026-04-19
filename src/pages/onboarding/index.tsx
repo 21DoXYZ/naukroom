@@ -61,13 +61,15 @@ export default function Onboarding() {
   }, [])
 
   async function saveProgress(data: Partial<OnboardingData>) {
-    await api.post('/onboarding/profile', { ...data, currentStep: step })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { postScreenshots: _screenshots, ...safeData } = data as OnboardingData
+    await api.post('/onboarding/profile', { ...safeData, currentStep: step })
   }
 
   async function next() {
     const data = methods.getValues()
     setSaving(true)
-    try { await saveProgress(data) } finally { setSaving(false) }
+    try { await saveProgress(data) } catch { /* save errors are non-blocking — step advances regardless */ } finally { setSaving(false) }
 
     if (step < TOTAL_STEPS) {
       setStep(s => s + 1)
