@@ -6,11 +6,21 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 export type ContentType = 'expert' | 'engaging' | 'selling' | 'pain' | 'objection'
 
 export interface ReelsScript {
+  // Contract fields (11_OUTPUT_CONTRACTS.md)
   title: string
+  pain: string
+  angle: string
+  related_offer: string
+  related_magnet: string
+  hook: string
+  key_message: string
+  CTA: string
+  scene_plan: string[]
+  caption_draft: string
+  // Rich structured fields
   contentType: ContentType
   leadMagnetLink: string
   painItCloses: string
-  hook: string
   mainIdea: string
   scenes: string[]
   cta: string
@@ -63,19 +73,27 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
   "scripts": [
     {
       "title": "Назва сценарію",
-      "contentType": "expert|engaging|selling|pain|objection",
-      "leadMagnetLink": "Який лід-магніт веде цей Reels (назва або короткий опис)",
-      "painItCloses": "Яку конкретну біль аудиторії закриває (фразою аудиторії)",
+      "pain": "Яку конкретну біль аудиторії закриває (фразою аудиторії)",
+      "angle": "Несподіваний або провокаційний кут подачі цього болю",
+      "related_offer": "Назва офера, до якого веде цей Reels",
+      "related_magnet": "Назва лід-магніту, який пропонується в CTA",
       "hook": "Перші 3 секунди — провокація або питання, що зупиняє скрол",
-      "mainIdea": "Основна теза цього Reels (1 речення)",
-      "scenes": [
+      "key_message": "Основна теза цього Reels (1 речення)",
+      "CTA": "Конкретний заклик до дії з кодовим словом або Direct",
+      "scene_plan": [
         "Кадр 1: що показати або сказати конкретно",
         "Кадр 2",
         "Кадр 3",
         "Кадр 4",
         "Кадр 5"
       ],
-      "cta": "Конкретний заклик до дії з кодовим словом або Direct",
+      "caption_draft": "2-4 речення під пост з CTA",
+      "contentType": "expert|engaging|selling|pain|objection",
+      "leadMagnetLink": "Який лід-магніт веде цей Reels (назва або короткий опис)",
+      "painItCloses": "Яку конкретну біль аудиторії закриває (фразою аудиторії)",
+      "mainIdea": "Основна теза цього Reels (1 речення)",
+      "scenes": ["Кадр 1", "Кадр 2", "Кадр 3", "Кадр 4", "Кадр 5"],
+      "cta": "Конкретний заклик до дії",
       "caption": "2-4 речення під пост",
       "goal": "охоплення|довіра|Direct|продаж",
       "format": "Говорюча голова|Туторіал|До-після|Список|Провокація|Порівняння"

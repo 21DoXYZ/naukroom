@@ -12,6 +12,16 @@ export interface FunnelStage {
 }
 
 export interface FunnelResult {
+  // Contract fields (11_OUTPUT_CONTRACTS.md)
+  goal: string
+  trigger_content: string
+  code_word: string
+  first_dm: string
+  follow_up_1: string
+  follow_up_2: string
+  handoff_to_expert: string
+  conversion_target: string
+  // Rich structured fields
   funnelName: string
   overview: string
   codeWord: string
@@ -46,8 +56,16 @@ export async function generateFunnel(profile: Record<string, unknown>): Promise<
 ${JSON.stringify(profile, null, 2)}
 ${nicheCtx}
 
-Побудуй воронку з кодовим словом. Поверни JSON:
+Побудуй воронку з кодовим словом. Поверни JSON (всі поля обов'язкові):
 {
+  "goal": "Мета воронки: від якого контенту до якого результату (1 речення)",
+  "trigger_content": "Опис Reels або поста, що запускає воронку (тема + хук)",
+  "code_word": "Кодове слово (1-2 слова)",
+  "first_dm": "Перше повідомлення в Direct після кодового слова (повний текст)",
+  "follow_up_1": "Follow-up через 24-48 год (повний текст)",
+  "follow_up_2": "Follow-up з CTA через 3-4 дні (повний текст)",
+  "handoff_to_expert": "Конкретні сигнали готовності купити — коли підключається живий спеціаліст",
+  "conversion_target": "На що конвертуємо: назва і ціна послуги",
   "funnelName": "Назва воронки (пов'язана з лід-магнітом і нішею)",
   "overview": "2 речення: як ця конкретна воронка працює для цього спеціаліста",
   "codeWord": "Конкретне кодове слово для коментаря (1-2 слова)",
@@ -118,6 +136,8 @@ ${nicheCtx}
     return JSON.parse(text) as FunnelResult
   } catch {
     return {
+      goal: '', trigger_content: '', code_word: '', first_dm: '',
+      follow_up_1: '', follow_up_2: '', handoff_to_expert: '', conversion_target: '',
       funnelName: '', overview: '', codeWord: '', stages: [],
       reelHooks: [], directScript: '', followUp1: '', followUp2: '',
       liveExpertCondition: '', objectionHandling: [],

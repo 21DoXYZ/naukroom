@@ -13,6 +13,16 @@ export interface OfferItem {
 }
 
 export interface OfferResult {
+  // Contract fields (11_OUTPUT_CONTRACTS.md)
+  positioning_statement: string
+  core_offer: string
+  secondary_offers: string[]
+  ideal_client_summary: string
+  main_problem: string
+  desired_result: string
+  recommended_entry_offer: string
+  recommended_cta: string
+  // Rich structured fields
   coreOffer: OfferItem
   upsell: OfferItem
   downsell: OfferItem
@@ -47,8 +57,16 @@ ${GOLDEN_EXAMPLES.offer}
 
 ${GOLDEN_EXAMPLES.badOutputPatterns}
 
-Побудуй продуктову лінійку. Поверни JSON:
+Побудуй продуктову лінійку. Поверни JSON (всі поля обов'язкові):
 {
+  "positioning_statement": "1 речення: для кого ти, яку проблему вирішуєш, яким результатом",
+  "core_offer": "Коротка назва і суть core-офера (1-2 речення)",
+  "secondary_offers": ["Upsell: назва + суть", "Downsell: назва + суть"],
+  "ideal_client_summary": "Хто ідеальний клієнт: вік, ситуація, запит",
+  "main_problem": "Головна проблема клієнта (конкретно, без канцеляриту)",
+  "desired_result": "Чого хоче клієнт (конкретний результат)",
+  "recommended_entry_offer": "Перший крок для нового клієнта (безкоштовна консультація, чекліст, etc.)",
+  "recommended_cta": "Готовий CTA-текст для Instagram",
   "coreOffer": {
     "name": "Назва core-офера (конкретна, без канцеляриту)",
     "description": "2-3 речення: що отримає клієнт, за який час, яким форматом — без розмитих слів",
@@ -94,12 +112,13 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
     return JSON.parse(text) as OfferResult
   } catch {
     return {
+      positioning_statement: '', core_offer: '', secondary_offers: [],
+      ideal_client_summary: '', main_problem: '', desired_result: '',
+      recommended_entry_offer: '', recommended_cta: '',
       coreOffer: { name: '', description: '', price: '', format: '', audience: '', usp: '' },
       upsell: { name: '', description: '', price: '', format: '', audience: '', usp: '' },
       downsell: { name: '', description: '', price: '', format: '', audience: '', usp: '' },
-      launchSequence: [],
-      pricingRationale: '',
-      salesPageHook: '',
+      launchSequence: [], pricingRationale: '', salesPageHook: '',
     }
   }
 }
