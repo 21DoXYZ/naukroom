@@ -20,19 +20,19 @@ const WHO_FOR = [
 ]
 
 const DELIVERABLES = [
-  { label: 'Аудит профілю', desc: 'Аналіз Instagram — що не працює і як виправити' },
-  { label: 'Позиціонування та офер', desc: 'Чіткий офер, для кого і яка цінність' },
-  { label: 'Упаковка профілю', desc: '3 варіанти Bio, структура Highlights, закріплені пости' },
-  { label: '1–3 лід-магніти', desc: 'Під ваші послуги, з CTA і схемою дистрибуції' },
-  { label: 'Воронка в Direct', desc: 'Reels → підписка → Direct → консультація' },
-  { label: '10 сценаріїв Reels', desc: 'З хуками, сценами, CTA і типом контенту' },
+  { label: 'Аудит профілю', desc: 'Аналіз Instagram — що не працює і як виправити', color: 'oklch(0.52 0.24 285)', bg: 'oklch(0.52 0.24 285 / 0.05)' },
+  { label: 'Позиціонування та офер', desc: 'Чіткий офер, для кого і яка цінність', color: 'oklch(0.56 0.18 195)', bg: 'oklch(0.56 0.18 195 / 0.05)' },
+  { label: 'Упаковка профілю', desc: '3 варіанти Bio, структура Highlights, закріплені пости', color: 'oklch(0.60 0.20 22)', bg: 'oklch(0.60 0.20 22 / 0.05)' },
+  { label: '1–3 лід-магніти', desc: 'Під ваші послуги, з CTA і схемою дистрибуції', color: 'oklch(0.68 0.17 72)', bg: 'oklch(0.68 0.17 72 / 0.05)' },
+  { label: 'Воронка в Direct', desc: 'Reels → підписка → Direct → консультація', color: 'oklch(0.56 0.17 155)', bg: 'oklch(0.56 0.17 155 / 0.05)' },
+  { label: '10 сценаріїв Reels', desc: 'З хуками, сценами, CTA і типом контенту', color: 'oklch(0.50 0.22 258)', bg: 'oklch(0.50 0.22 258 / 0.05)' },
 ]
 
 const HOW_STEPS = [
-  { n: '01', label: 'Проходите покроковий онбординг', desc: 'Розповідаєте про себе, аудиторію, послуги і цілі' },
-  { n: '02', label: 'Система аналізує ваш профіль', desc: 'AI будує позиціонування, офер, лід-магніт і контент на основі ваших відповідей' },
-  { n: '03', label: 'Отримуєте персоналізований маркетинг-пак', desc: 'Всі матеріали в одному місці — готові до використання' },
-  { n: '04', label: 'Впроваджуєте в Instagram', desc: 'Починаєте системно залучати клієнтів' },
+  { n: '01', label: 'Проходите покроковий онбординг', desc: 'Розповідаєте про себе, аудиторію, послуги і цілі', color: 'oklch(0.52 0.24 285)' },
+  { n: '02', label: 'Система аналізує ваш профіль', desc: 'AI будує позиціонування, офер, лід-магніт і контент на основі ваших відповідей', color: 'oklch(0.56 0.18 195)' },
+  { n: '03', label: 'Отримуєте персоналізований маркетинг-пак', desc: 'Всі матеріали в одному місці — готові до використання', color: 'oklch(0.60 0.20 22)' },
+  { n: '04', label: 'Впроваджуєте в Instagram', desc: 'Починаєте системно залучати клієнтів', color: 'oklch(0.56 0.17 155)' },
 ]
 
 const FAQ = [
@@ -105,7 +105,7 @@ export default function Landing() {
               viewport={{ once: true }} transition={{ type: 'spring', stiffness: 260, damping: 28, delay: i * 0.07 }}
               className="flex items-start gap-3 py-3 border-b border-black/8 last:border-0"
             >
-              <Check className="h-4 w-4 text-black mt-0.5 shrink-0" />
+              <Check className="h-4 w-4 mt-0.5 shrink-0" style={{ color: 'oklch(0.52 0.24 285)' }} />
               <p className="text-[1rem] fw-330 tracking-[-0.1px]">{item}</p>
             </motion.div>
           ))}
@@ -131,8 +131,10 @@ export default function Landing() {
             <motion.div key={i}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ type: 'spring', stiffness: 260, damping: 28, delay: i * 0.07 }}
-              className="p-5 border border-black/10 rounded-[8px]"
+              className="p-5 rounded-[8px] border border-black/8"
+              style={{ background: d.bg, borderTopColor: d.color, borderTopWidth: 3 }}
             >
+              <div className="w-2 h-2 rounded-full mb-3" style={{ background: d.color }} />
               <p className="fw-480 text-[0.9375rem] tracking-[-0.1px] mb-2">{d.label}</p>
               <p className="type-body text-[rgba(0,0,0,0.55)]">{d.desc}</p>
             </motion.div>
@@ -161,7 +163,7 @@ export default function Landing() {
               viewport={{ once: true }} transition={{ type: 'spring', stiffness: 260, damping: 28, delay: i * 0.09 }}
               className="flex gap-5"
             >
-              <span className="text-[2rem] fw-300 tracking-[-1px] text-[rgba(0,0,0,0.15)] shrink-0 leading-none mt-0.5">{s.n}</span>
+              <span className="text-[2rem] fw-300 tracking-[-1px] shrink-0 leading-none mt-0.5" style={{ color: s.color }}>{s.n}</span>
               <div>
                 <p className="fw-480 text-[0.9375rem] tracking-[-0.1px] mb-1.5">{s.label}</p>
                 <p className="type-body text-[rgba(0,0,0,0.55)]">{s.desc}</p>
@@ -215,17 +217,19 @@ export default function Landing() {
       </section>
 
       {/* CTA bottom */}
-      <section className="border-t border-black/8">
-        <div className="max-w-5xl mx-auto px-6 py-20 flex flex-col items-start gap-6">
+      <section className="cta-gradient">
+        <div className="max-w-5xl mx-auto px-6 py-24 flex flex-col items-start gap-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
-            <p className="type-mono-label text-[rgba(0,0,0,0.4)] mb-3">Готові спробувати?</p>
-            <h2 className="text-[2rem] fw-400 tracking-[-0.8px] leading-[1.1] mb-6 max-w-[480px]">
+            <p className="type-mono-label text-white/40 mb-3">Готові спробувати?</p>
+            <h2 className="text-[2.5rem] fw-320 tracking-[-1px] leading-[1.05] mb-8 max-w-[560px] text-white">
               Отримайте ранній доступ до Naukroom
             </h2>
-            <Button size="lg" onClick={() => navigate('/register')}>
+            <Button size="lg"
+              className="bg-white! text-black! hover:bg-white/90!"
+              onClick={() => navigate('/register')}>
               Подати заявку <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </motion.div>
@@ -233,10 +237,10 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-black/8">
+      <footer className="cta-gradient border-t border-white/10">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="type-mono-label text-[rgba(0,0,0,0.35)]">© 2025 Naukroom</span>
-          <span className="type-mono-label text-[rgba(0,0,0,0.35)]">AI-маркетинг для health-експертів</span>
+          <span className="type-mono-label text-white/30">© 2025 Naukroom</span>
+          <span className="type-mono-label text-white/30">AI-маркетинг для health-експертів</span>
         </div>
       </footer>
     </div>

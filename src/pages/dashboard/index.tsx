@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CheckCircle, Circle, Lock, ChevronRight, LogOut } from 'lucide-react'
+import { CheckCircle2, Circle, Lock, ChevronRight, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/lib/auth'
 
@@ -83,6 +83,7 @@ export default function Dashboard() {
   ]
 
   const doneCount = steps.filter(s => s.status === 'done').length
+  const progress = Math.round((doneCount / steps.length) * 100)
 
   return (
     <div className="min-h-screen bg-white">
@@ -104,9 +105,18 @@ export default function Dashboard() {
           <h1 className="type-display mb-3">
             {user?.name ? `Привіт, ${user.name.split(' ')[0]}` : 'Кабінет'}
           </h1>
-          <p className="type-body text-[rgba(0,0,0,0.55)]">
+          <p className="type-body text-[rgba(0,0,0,0.55)] mb-4">
             Виконано {doneCount} з {steps.length} етапів
           </p>
+          <div className="h-1.5 w-full max-w-xs rounded-full bg-black/8 overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: 'linear-gradient(90deg, oklch(0.52 0.24 285), oklch(0.56 0.18 195))' }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ type: 'spring', stiffness: 120, damping: 24, delay: 0.4 }}
+            />
+          </div>
         </motion.div>
 
         <div className="flex flex-col">
@@ -114,15 +124,15 @@ export default function Dashboard() {
             <motion.div
               key={s.id}
               initial="hidden" animate="visible" variants={spring} custom={i + 1}
-              className={`flex items-center gap-4 py-4 border-b border-black/8 last:border-0 ${
-                s.status !== 'locked' && s.href ? 'cursor-pointer group' : ''
+              className={`flex items-center gap-4 py-4 border-b border-black/8 last:border-0 rounded-[6px] px-2 -mx-2 transition-colors ${
+                s.status !== 'locked' && s.href ? 'cursor-pointer group hover:bg-black/[0.025]' : ''
               }`}
               onClick={() => s.href && s.status !== 'locked' && navigate(s.href)}
             >
               <div className="shrink-0">
-                {s.status === 'done' && <CheckCircle className="h-5 w-5 text-black" />}
-                {s.status === 'available' && <Circle className="h-5 w-5 text-black" />}
-                {s.status === 'locked' && <Lock className="h-4.5 w-4.5 text-[rgba(0,0,0,0.2)]" />}
+                {s.status === 'done' && <CheckCircle2 className="h-5 w-5" style={{ color: 'oklch(0.56 0.17 155)' }} />}
+                {s.status === 'available' && <Circle className="h-5 w-5" style={{ color: 'oklch(0.52 0.24 285)' }} />}
+                {s.status === 'locked' && <Lock className="h-4 w-4 text-[rgba(0,0,0,0.2)]" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className={`text-[0.9375rem] fw-480 tracking-[-0.1px] ${s.status === 'locked' ? 'text-[rgba(0,0,0,0.35)]' : 'text-black'}`}>
@@ -136,7 +146,10 @@ export default function Dashboard() {
                 <ChevronRight className="h-4 w-4 text-[rgba(0,0,0,0.3)] group-hover:text-black transition-colors shrink-0" />
               )}
               {s.status === 'done' && s.href && (
-                <span className="type-mono-label text-[rgba(0,0,0,0.35)] shrink-0">Готово</span>
+                <span className="type-mono-label shrink-0 px-2 py-0.5 rounded-full text-[10px]"
+                  style={{ color: 'oklch(0.56 0.17 155)', background: 'oklch(0.56 0.17 155 / 0.1)' }}>
+                  Готово
+                </span>
               )}
             </motion.div>
           ))}

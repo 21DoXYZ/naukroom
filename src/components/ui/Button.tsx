@@ -14,7 +14,7 @@ type ButtonProps = Omit<HTMLMotionProps<'button'>, 'variants'> &
 const base = 'inline-flex items-center justify-center cursor-pointer fw-450 tracking-[-0.1px] transition-colors disabled:opacity-40 disabled:pointer-events-none rounded-[50px]'
 
 const variants: Record<Variant, string> = {
-  solid:       'bg-black text-white hover:bg-black/85',
+  solid:       'bg-[oklch(0.52_0.24_285)] text-white hover:bg-[oklch(0.48_0.24_285)] shadow-[0_2px_12px_oklch(0.52_0.24_285/0.35)]',
   white:       'bg-white text-black hover:bg-white/90',
   ghost:       'bg-transparent text-black hover:bg-black/6',
   'glass-dark': 'bg-[rgba(0,0,0,0.07)] text-black hover:bg-[rgba(0,0,0,0.12)]',
