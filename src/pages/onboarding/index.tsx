@@ -112,7 +112,7 @@ export default function Onboarding() {
           <p className="type-body text-[rgba(0,0,0,0.5)]">Чим конкретніше ви описуєте свою аудиторію та послуги, тим точніший результат отримаєте.</p>
         </div>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           <motion.div key={step} variants={spring} initial="hidden" animate="visible" exit="exit">
             <p className="type-mono-label text-[rgba(0,0,0,0.4)] mb-2">Крок {step}</p>
             <h1 className="text-[1.75rem] fw-400 tracking-[-0.6px] leading-[1.15] mb-6">
