@@ -58,6 +58,14 @@ export const businessProfiles = sqliteTable('business_profiles', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }),
 })
 
+export const analyticsEvents = sqliteTable('analytics_events', {
+  id: text('id').primaryKey(),
+  userId: text('user_id'),
+  event: text('event').notNull(),
+  properties: text('properties'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+})
+
 export const generatedOutputs = sqliteTable('generated_outputs', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),

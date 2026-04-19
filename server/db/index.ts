@@ -14,6 +14,14 @@ sqlite.pragma('foreign_keys = ON')
 
 // Auto-create tables on first run
 sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS analytics_events (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    event TEXT NOT NULL,
+    properties TEXT,
+    created_at INTEGER NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,

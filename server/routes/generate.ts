@@ -14,6 +14,7 @@ import { generateContentPack } from '../ai/content-engine.js'
 import { runQA } from '../ai/qa-rewriter.js'
 import { composeMarketingPack } from '../ai/marketing-pack-composer.js'
 import { randomUUID } from 'crypto'
+import { track } from '../analytics.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -162,11 +163,18 @@ function sseRoute(
       const result = await generator(profile as Record<string, unknown>)
       const qa = await runQA(type, result as Record<string, unknown>)
 
+      const existingCount = db.select({ id: generatedOutputs.id }).from(generatedOutputs)
+        .where(eq(generatedOutputs.userId, req.userId!)).all().length
+
       const id = randomUUID()
       db.insert(generatedOutputs).values({
         id, userId: req.userId!, type, content: JSON.stringify(result),
         qaScore: JSON.stringify(qa), status: 'pending', createdAt: new Date(),
       }).run()
+
+      if (existingCount === 0) track('first_generation_completed', req.userId!, { type })
+      track('generation_completed', req.userId!, { type })
+
       res.write(`data: ${JSON.stringify({ status: 'done', result, outputId: id, qa })}\n\n`)
       res.end()
     } catch (err) {
@@ -223,6 +231,8 @@ router.post('/marketing-pack', async (req: AuthRequest, res) => {
       status: 'pending',
       createdAt: new Date(),
     }).run()
+
+    track('export_completed', req.userId!)
 
     res.write(`data: ${JSON.stringify({ status: 'done', result: pack, outputId: id })}\n\n`)
     res.end()

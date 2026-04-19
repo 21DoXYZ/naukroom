@@ -6,6 +6,7 @@ import { db } from '../db/index.js'
 import { users } from '../db/schema.js'
 import { requireAuth, type AuthRequest } from '../middleware/auth.js'
 import { randomUUID } from 'crypto'
+import { track } from '../analytics.js'
 
 const router = Router()
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret'
@@ -50,6 +51,7 @@ router.post('/register', async (req, res) => {
     createdAt: now,
   }).run()
 
+  track('registration_completed', id, { email: email.toLowerCase() })
   res.json({ token: makeToken(id, 'user'), user: { id, email: email.toLowerCase(), name, role: 'user', onboardingStatus: 'not_started' } })
 })
 

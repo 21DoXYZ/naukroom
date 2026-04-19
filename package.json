@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:demo": "node --import tsx/esm server/seed-demo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

@@ -4,6 +4,7 @@ import { db } from '../db/index.js'
 import { businessProfiles, users } from '../db/schema.js'
 import { requireAuth, type AuthRequest } from '../middleware/auth.js'
 import { randomUUID } from 'crypto'
+import { track } from '../analytics.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -43,6 +44,7 @@ router.post('/complete', (req: AuthRequest, res) => {
     .set({ onboardingStatus: 'completed' })
     .where(eq(users.id, req.userId!))
     .run()
+  track('onboarding_completed', req.userId!)
   res.json({ ok: true })
 })
 

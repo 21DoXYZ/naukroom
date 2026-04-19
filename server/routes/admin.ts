@@ -3,6 +3,7 @@ import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { users, businessProfiles, generatedOutputs } from '../db/schema.js'
 import { requireAdmin, type AuthRequest } from '../middleware/auth.js'
+import { analyticsEvents } from '../db/schema.js'
 import { generatePositioningSummary } from '../ai/positioning-summary.js'
 import { generateProfileAudit } from '../ai/profile-auditor.js'
 import { generateOffer } from '../ai/offer-builder.js'
@@ -24,6 +25,20 @@ const GENERATORS: Record<string, (p: Record<string, unknown>) => Promise<unknown
 
 const router = Router()
 router.use(requireAdmin)
+
+router.get('/analytics', (_req, res) => {
+  const events = db.select().from(analyticsEvents)
+    .orderBy(desc(analyticsEvents.createdAt))
+    .limit(500)
+    .all()
+
+  const summary: Record<string, number> = {}
+  for (const e of events) {
+    summary[e.event] = (summary[e.event] ?? 0) + 1
+  }
+
+  res.json({ summary, recent: events.slice(0, 50) })
+})
 
 router.get('/users', (_req, res) => {
   const list = db.select({
