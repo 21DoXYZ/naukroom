@@ -87,7 +87,7 @@ label для кожної категорії: якщо score >= 7 то "Добр
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 1800,
-      system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
+      system: SYSTEM,
       messages: [{ role: 'user', content: prompt }],
     })
 
@@ -96,8 +96,9 @@ label для кожної категорії: якщо score >= 7 то "Добр
     const audit = JSON.parse(clean)
     res.json(audit)
   } catch (err) {
-    console.error('[lite/audit]', err)
-    res.status(500).json({ error: 'Generation failed' })
+    const detail = err instanceof Error ? err.message : String(err)
+    console.error('[lite/audit]', detail)
+    res.status(500).json({ error: 'Generation failed', detail })
   }
 })
 
