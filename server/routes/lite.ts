@@ -8,7 +8,9 @@ import { randomUUID } from 'crypto'
 
 const router = Router()
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+function getClient() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+}
 
 const SYSTEM = `Ти - провідний Instagram-маркетолог для health/wellness-спеціалістів в Україні.
 Аналізуєш профіль нутриціолога / health-коуча / косметолога і видаєш конкретний аудит з actionable рекомендаціями.
@@ -84,9 +86,9 @@ router.post('/audit', liteAuditLimiter, async (req, res) => {
 label для кожної категорії: якщо score >= 7 то "Добре", якщо 4-6 то "Потребує роботи", якщо <= 3 то "Критично".`
 
   try {
-    const msg = await client.messages.create({
+    const msg = await getClient().messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 1800,
+      max_tokens: 2500,
       system: SYSTEM,
       messages: [{ role: 'user', content: prompt }],
     })

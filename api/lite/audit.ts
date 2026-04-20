@@ -99,7 +99,7 @@ label для кожної категорії: якщо score >= 7 то "Добр
   try {
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 1800,
+      max_tokens: 2500,
       system: SYSTEM,
       messages: [{ role: 'user', content: prompt }],
     })
