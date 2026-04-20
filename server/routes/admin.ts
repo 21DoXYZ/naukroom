@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/index.js'
-import { users, businessProfiles, generatedOutputs } from '../db/schema.js'
+import { users, businessProfiles, generatedOutputs, liteSubmissions } from '../db/schema.js'
 import { requireAdmin, type AuthRequest } from '../middleware/auth.js'
 import { analyticsEvents } from '../db/schema.js'
 import { generatePositioningSummary } from '../ai/positioning-summary.js'
@@ -25,6 +25,32 @@ const GENERATORS: Record<string, (p: Record<string, unknown>) => Promise<unknown
 
 const router = Router()
 router.use(requireAdmin)
+
+router.get('/lite-submissions', (_req, res) => {
+  const all = db.select().from(liteSubmissions)
+    .orderBy(desc(liteSubmissions.createdAt))
+    .all()
+
+  const byType: Record<string, unknown[]> = { waitlist: [], beta: [], demo: [] }
+  for (const row of all) {
+    try {
+      const parsed = JSON.parse(row.data) as unknown
+      byType[row.type]?.push({ id: row.id, createdAt: row.createdAt, ...parsed as object })
+    } catch {
+      byType[row.type]?.push({ id: row.id, createdAt: row.createdAt, raw: row.data })
+    }
+  }
+
+  res.json({
+    counts: {
+      waitlist: byType.waitlist.length,
+      beta: byType.beta.length,
+      demo: byType.demo.length,
+      total: all.length,
+    },
+    submissions: byType,
+  })
+})
 
 router.get('/analytics', (_req, res) => {
   const events = db.select().from(analyticsEvents)

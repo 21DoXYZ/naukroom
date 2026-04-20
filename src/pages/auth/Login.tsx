@@ -65,13 +65,18 @@ export default function Login() {
           </Button>
         </motion.form>
 
-        <motion.p
-          className="text-center type-body text-[rgba(0,0,0,0.5)] mt-6"
+        <motion.div
+          className="flex flex-col items-center gap-2 mt-6"
           initial="hidden" animate="visible" variants={spring} custom={2}
         >
-          Ще немає акаунту?{' '}
-          <Link to="/register" className="text-black fw-480 underline underline-offset-2">Зареєструватися</Link>
-        </motion.p>
+          <p className="text-center type-body text-[rgba(0,0,0,0.5)]">
+            Ще немає акаунту?{' '}
+            <Link to="/register" className="text-black fw-480 underline underline-offset-2">Зареєструватися</Link>
+          </p>
+          <Link to="/forgot-password" className="text-[0.875rem] text-[rgba(0,0,0,0.4)] hover:text-black transition-colors">
+            Забули пароль?
+          </Link>
+        </motion.div>
       </div>
     </div>
   )

@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from '@/lib/auth'
 import Landing from '@/pages/landing'
 import Login from '@/pages/auth/Login'
 import Register from '@/pages/auth/Register'
+import ForgotPassword from '@/pages/auth/ForgotPassword'
+import ResetPassword from '@/pages/auth/ResetPassword'
 import Onboarding from '@/pages/onboarding'
 import ValueMoment from '@/pages/onboarding/ValueMoment'
 import Dashboard from '@/pages/dashboard'
@@ -16,6 +18,12 @@ import ExportPage from '@/pages/export'
 import MarketingPackPage from '@/pages/marketing-pack'
 import Admin from '@/pages/admin'
 import AdminUserDetail from '@/pages/admin/UserDetail'
+import LiteLanding from '@/pages/lite/Landing'
+import LiteTool from '@/pages/lite/Tool'
+import LiteResult from '@/pages/lite/Result'
+import LiteWaitlist from '@/pages/lite/Waitlist'
+import LiteBeta from '@/pages/lite/Beta'
+import LiteDemo from '@/pages/lite/Demo'
 import { Spinner } from '@/components/ui/Spinner'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -53,6 +61,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
       <Route path="/onboarding/result" element={<RequireAuth><ValueMoment /></RequireAuth>} />
@@ -69,6 +79,14 @@ function AppRoutes() {
 
       <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
       <Route path="/admin/users/:id" element={<RequireAdmin><AdminUserDetail /></RequireAdmin>} />
+
+      {/* GTM artifact shell — public, no auth */}
+      <Route path="/lite" element={<LiteLanding />} />
+      <Route path="/lite/tool" element={<LiteTool />} />
+      <Route path="/lite/result" element={<LiteResult />} />
+      <Route path="/lite/waitlist" element={<LiteWaitlist />} />
+      <Route path="/lite/beta" element={<LiteBeta />} />
+      <Route path="/lite/demo" element={<LiteDemo />} />
 
       <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
       <Route path="*" element={<Navigate to="/" replace />} />

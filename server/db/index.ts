@@ -71,6 +71,13 @@ sqlite.exec(`
     created_at INTEGER NOT NULL,
     updated_at INTEGER
   );
+
+  CREATE TABLE IF NOT EXISTS lite_submissions (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    data TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
 `)
 
 // Migrate existing databases: add qa_score if missing

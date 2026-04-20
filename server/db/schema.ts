@@ -66,6 +66,13 @@ export const analyticsEvents = sqliteTable('analytics_events', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 })
 
+export const liteSubmissions = sqliteTable('lite_submissions', {
+  id: text('id').primaryKey(),
+  type: text('type', { enum: ['waitlist', 'beta', 'demo'] }).notNull(),
+  data: text('data').notNull(), // JSON
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+})
+
 export const generatedOutputs = sqliteTable('generated_outputs', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
