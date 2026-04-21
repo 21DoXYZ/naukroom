@@ -80,14 +80,16 @@ export async function fetchViaApify(handle: string, token: string): Promise<Inst
 
   const d = items[0]
 
-  if (d.isPrivate) {
+  const isPrivate = Boolean(d.private ?? d.isPrivate)
+
+  if (isPrivate) {
     return {
       username: String(d.username ?? handle),
       fullName: String(d.fullName ?? ''),
       bio: '',
-      followers: Number(d.followersCount ?? 0),
-      following: Number(d.followsCount ?? 0),
-      mediaCount: Number(d.postsCount ?? 0),
+      followers: Number(d.followersCount ?? d.follower_count ?? 0),
+      following: Number(d.followsCount ?? d.following_count ?? 0),
+      mediaCount: Number(d.postsCount ?? d.media_count ?? 0),
       isPrivate: true,
     }
   }
@@ -96,9 +98,9 @@ export async function fetchViaApify(handle: string, token: string): Promise<Inst
     username: String(d.username ?? handle),
     fullName: String(d.fullName ?? ''),
     bio: String(d.biography ?? d.bio ?? ''),
-    followers: Number(d.followersCount ?? 0),
-    following: Number(d.followsCount ?? 0),
-    mediaCount: Number(d.postsCount ?? 0),
-    isPrivate: Boolean(d.isPrivate),
+    followers: Number(d.followersCount ?? d.follower_count ?? 0),
+    following: Number(d.followsCount ?? d.following_count ?? 0),
+    mediaCount: Number(d.postsCount ?? d.media_count ?? 0),
+    isPrivate: false,
   }
 }

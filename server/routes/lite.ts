@@ -248,15 +248,16 @@ router.get('/profile', async (req, res) => {
     }
 
     const d = items[0]
+    const isPrivate = Boolean(d.private ?? d.isPrivate)
 
-    if (d.isPrivate) {
+    if (isPrivate) {
       res.json({
         username: String(d.username ?? handle),
         fullName: String(d.fullName ?? ''),
         bio: '',
-        followers: Number(d.followersCount ?? 0),
-        following: Number(d.followsCount ?? 0),
-        mediaCount: Number(d.postsCount ?? 0),
+        followers: Number(d.followersCount ?? d.follower_count ?? 0),
+        following: Number(d.followsCount ?? d.following_count ?? 0),
+        mediaCount: Number(d.postsCount ?? d.media_count ?? 0),
         isPrivate: true,
       })
       return
@@ -266,9 +267,9 @@ router.get('/profile', async (req, res) => {
       username: String(d.username ?? handle),
       fullName: String(d.fullName ?? ''),
       bio: String(d.biography ?? d.bio ?? ''),
-      followers: Number(d.followersCount ?? 0),
-      following: Number(d.followsCount ?? 0),
-      mediaCount: Number(d.postsCount ?? 0),
+      followers: Number(d.followersCount ?? d.follower_count ?? 0),
+      following: Number(d.followsCount ?? d.following_count ?? 0),
+      mediaCount: Number(d.postsCount ?? d.media_count ?? 0),
       isPrivate: false,
     })
   } catch (err) {
