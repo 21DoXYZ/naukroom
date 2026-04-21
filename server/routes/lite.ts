@@ -204,6 +204,80 @@ JSON (поверни тільки його, без коментарів):
   }
 })
 
+// ── Instagram profile fetch via Apify ────────────────────────────────────
+
+function normalizeHandle(raw: string): string {
+  const s = raw.trim()
+  const urlMatch = s.match(/instagram\.com\/([A-Za-z0-9._]+)/)
+  if (urlMatch) return urlMatch[1]
+  return s.replace(/^@/, '')
+}
+
+router.get('/profile', async (req, res) => {
+  const raw = req.query.handle as string | undefined
+  if (!raw) { res.status(400).json({ error: 'handle is required' }); return }
+
+  const handle = normalizeHandle(raw)
+  if (!handle) { res.status(400).json({ error: 'Invalid handle' }); return }
+
+  const token = process.env.APIFY_TOKEN
+  if (!token) { res.status(503).json({ error: 'not_configured' }); return }
+
+  try {
+    const url = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${token}`
+
+    const apifyRes = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usernames: [handle] }),
+      signal: AbortSignal.timeout(55_000),
+    })
+
+    if (!apifyRes.ok) {
+      const text = await apifyRes.text()
+      console.error('[lite/profile] Apify error', apifyRes.status, text.slice(0, 200))
+      res.status(502).json({ error: 'Could not fetch Instagram profile' })
+      return
+    }
+
+    const items = await apifyRes.json() as Record<string, unknown>[]
+
+    if (!items || items.length === 0) {
+      res.status(404).json({ error: 'not_found', message: 'Профіль не знайдено' })
+      return
+    }
+
+    const d = items[0]
+
+    if (d.isPrivate) {
+      res.json({
+        username: String(d.username ?? handle),
+        fullName: String(d.fullName ?? ''),
+        bio: '',
+        followers: Number(d.followersCount ?? 0),
+        following: Number(d.followsCount ?? 0),
+        mediaCount: Number(d.postsCount ?? 0),
+        isPrivate: true,
+      })
+      return
+    }
+
+    res.json({
+      username: String(d.username ?? handle),
+      fullName: String(d.fullName ?? ''),
+      bio: String(d.biography ?? d.bio ?? ''),
+      followers: Number(d.followersCount ?? 0),
+      following: Number(d.followsCount ?? 0),
+      mediaCount: Number(d.postsCount ?? 0),
+      isPrivate: false,
+    })
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    console.error('[lite/profile]', detail)
+    res.status(500).json({ error: 'Fetch failed', detail })
+  }
+})
+
 // ── form submissions → Telegram notification ──────────────────────────────
 
 const FIELD_LABELS: Record<string, string> = {

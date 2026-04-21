@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Loader2, CheckCircle2, AlertCircle, Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { track } from '@/lib/analytics'
 
@@ -19,6 +20,14 @@ interface Errors {
 
 type Stage = 'form' | 'loading'
 
+type FetchStatus =
+  | { state: 'idle' }
+  | { state: 'loading' }
+  | { state: 'success'; username: string; followers: number; mediaCount: number }
+  | { state: 'private'; username: string }
+  | { state: 'error'; message: string }
+  | { state: 'not_configured' }
+
 const OFFER_TYPES = [
   { value: '', label: 'Оберіть варіант...' },
   { value: 'Особисті консультації', label: 'Особисті консультації' },
@@ -34,6 +43,21 @@ const LOADING_MESSAGES = [
   'Готуємо 3 варіанти переписаного Bio з різними стратегіями...',
   'Формуємо конкретні рекомендації під вашу нішу...',
 ]
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '/api'
+
+function formatFollowers(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+  return String(n)
+}
+
+function normalizeHandle(raw: string): string {
+  const s = raw.trim()
+  const urlMatch = s.match(/instagram\.com\/([A-Za-z0-9._]+)/)
+  if (urlMatch) return urlMatch[1]
+  return s.replace(/^@/, '')
+}
 
 function validate(data: FormData): Errors {
   const errors: Errors = {}
@@ -59,6 +83,7 @@ export default function LiteTool() {
   })
   const [errors, setErrors] = useState<Errors>({})
   const [touched, setTouched] = useState<Partial<Record<keyof FormData, boolean>>>({})
+  const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ state: 'idle' })
   const msgTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -77,6 +102,60 @@ export default function LiteTool() {
     const next = { ...form, [field]: value }
     setForm(next)
     if (touched[field]) setErrors(validate(next))
+    // Reset fetch status if handle changes
+    if (field === 'instagramUrl') setFetchStatus({ state: 'idle' })
+  }
+
+  async function fetchInstagramProfile() {
+    const handle = normalizeHandle(form.instagramUrl)
+    if (!handle) return
+
+    setFetchStatus({ state: 'loading' })
+    track('instagram_fetch_start', { handle })
+
+    try {
+      const res = await fetch(`${API_BASE}/lite/profile?handle=${encodeURIComponent(handle)}`)
+      const data = await res.json() as Record<string, unknown>
+
+      if (!res.ok) {
+        if (data.error === 'not_configured') {
+          setFetchStatus({ state: 'not_configured' })
+          return
+        }
+        if (data.error === 'not_found') {
+          setFetchStatus({ state: 'error', message: 'Профіль не знайдено. Перевірте handle.' })
+          return
+        }
+        setFetchStatus({ state: 'error', message: 'Не вдалося завантажити профіль. Введіть Bio вручну.' })
+        return
+      }
+
+      if (data.isPrivate) {
+        setFetchStatus({
+          state: 'private',
+          username: String(data.username ?? handle),
+        })
+        return
+      }
+
+      const bio = String(data.bio ?? '')
+      const username = String(data.username ?? handle)
+      const followers = Number(data.followers ?? 0)
+      const mediaCount = Number(data.mediaCount ?? 0)
+
+      // Auto-fill bio if it's empty or user hasn't typed yet
+      if (bio) {
+        setForm(prev => ({
+          ...prev,
+          bio: prev.bio.trim() === '' ? bio : prev.bio,
+        }))
+      }
+
+      setFetchStatus({ state: 'success', username, followers, mediaCount })
+      track('instagram_fetch_success', { handle, followers, has_bio: bio.length > 0 })
+    } catch {
+      setFetchStatus({ state: 'error', message: 'Помилка з\'єднання. Введіть Bio вручну.' })
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -92,6 +171,7 @@ export default function LiteTool() {
       has_instagram_url: !!form.instagramUrl.trim(),
       has_offer_type: !!form.offerType,
       has_transformation: !!form.clientTransformation.trim(),
+      instagram_fetched: fetchStatus.state === 'success',
       profession: form.profession.trim(),
     })
 
@@ -129,6 +209,8 @@ export default function LiteTool() {
     navigate('/lite/result')
   }
 
+  const canFetch = form.instagramUrl.trim().length > 1 && fetchStatus.state !== 'loading'
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header className="border-b border-black/8 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
@@ -159,10 +241,103 @@ export default function LiteTool() {
                   Розкажіть про ваш профіль
                 </h1>
                 <p className="type-body text-[rgba(0,0,0,0.55)] mb-8">
-                  Чим більше контексту — тим точніший і корисніший аудит.
+                  Вставте Instagram handle — Bio підтягнеться автоматично.
                 </p>
 
                 <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+
+                  {/* Instagram handle + fetch button */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[0.875rem] fw-480 tracking-[-0.1px]">
+                      Instagram профіль
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={form.instagramUrl}
+                        onChange={e => handleChange('instagramUrl', e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && canFetch && (e.preventDefault(), fetchInstagramProfile())}
+                        placeholder="@handle або instagram.com/..."
+                        className="flex-1 h-10 px-4 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors placeholder:text-[rgba(0,0,0,0.3)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={fetchInstagramProfile}
+                        disabled={!canFetch}
+                        className={[
+                          'h-10 px-4 rounded-[8px] border text-[0.875rem] fw-480 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer',
+                          canFetch
+                            ? 'border-black/20 hover:border-black/40 hover:bg-black/[0.03] text-[rgba(0,0,0,0.7)]'
+                            : 'border-black/8 text-[rgba(0,0,0,0.25)] cursor-not-allowed',
+                        ].join(' ')}
+                      >
+                        {fetchStatus.state === 'loading'
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : <Download className="h-3.5 w-3.5" />
+                        }
+                        {fetchStatus.state === 'loading' ? 'Завантаження...' : 'Завантажити'}
+                      </button>
+                    </div>
+
+                    {/* Fetch status feedback */}
+                    <AnimatePresence>
+                      {fetchStatus.state === 'success' && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-[6px] bg-[oklch(0.56_0.17_155/0.07)] border border-[oklch(0.56_0.17_155/0.2)]"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 text-[oklch(0.56_0.17_155)] shrink-0" />
+                          <p className="text-[0.8125rem] text-[rgba(0,0,0,0.7)]">
+                            @{fetchStatus.username} · {formatFollowers(fetchStatus.followers)} підписників · {fetchStatus.mediaCount} постів
+                          </p>
+                        </motion.div>
+                      )}
+
+                      {fetchStatus.state === 'private' && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-[6px] bg-[oklch(0.68_0.17_72/0.07)] border border-[oklch(0.68_0.17_72/0.2)]"
+                        >
+                          <AlertCircle className="h-3.5 w-3.5 text-[oklch(0.68_0.17_72)] shrink-0" />
+                          <p className="text-[0.8125rem] text-[rgba(0,0,0,0.7)]">
+                            @{fetchStatus.username} — закритий профіль. Введіть Bio нижче вручну.
+                          </p>
+                        </motion.div>
+                      )}
+
+                      {fetchStatus.state === 'error' && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-[6px] bg-black/[0.03]"
+                        >
+                          <AlertCircle className="h-3.5 w-3.5 text-[rgba(0,0,0,0.4)] shrink-0" />
+                          <p className="text-[0.8125rem] text-[rgba(0,0,0,0.55)]">{fetchStatus.message}</p>
+                        </motion.div>
+                      )}
+
+                      {fetchStatus.state === 'not_configured' && (
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-[0.8125rem] text-[rgba(0,0,0,0.4)]"
+                        >
+                          Автозавантаження не налаштоване — введіть Bio вручну нижче.
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+
+                    {fetchStatus.state === 'idle' && (
+                      <p className="text-[0.8125rem] text-[rgba(0,0,0,0.4)]">
+                        Bio підтягнеться автоматично — залишиться тільки перевірити
+                      </p>
+                    )}
+                  </div>
 
                   {/* Profession */}
                   <div className="flex flex-col gap-1.5">
@@ -187,6 +362,11 @@ export default function LiteTool() {
                     <div className="flex items-center justify-between">
                       <label className="text-[0.875rem] fw-480 tracking-[-0.1px]">
                         Ваше поточне Bio в Instagram
+                        {fetchStatus.state === 'success' && (
+                          <span className="ml-2 text-[0.75rem] fw-400 text-[oklch(0.56_0.17_155)]">
+                            · завантажено
+                          </span>
+                        )}
                       </label>
                       <span className="text-[0.75rem] text-[rgba(0,0,0,0.35)]">
                         {form.bio.length}/500
@@ -196,7 +376,11 @@ export default function LiteTool() {
                       value={form.bio}
                       onChange={e => handleChange('bio', e.target.value)}
                       onBlur={() => handleBlur('bio')}
-                      placeholder="Вставте текст вашого Bio з Instagram"
+                      placeholder={
+                        fetchStatus.state === 'loading'
+                          ? 'Завантажуємо з Instagram...'
+                          : 'Вставте текст вашого Bio або відредагуйте завантажений'
+                      }
                       maxLength={500}
                       rows={4}
                       className="px-4 py-3 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors resize-none leading-[1.5] placeholder:text-[rgba(0,0,0,0.3)]"
@@ -205,7 +389,7 @@ export default function LiteTool() {
                       <p className="text-[0.8125rem] text-[oklch(0.55_0.20_22)]">{errors.bio}</p>
                     )}
                     <p className="text-[0.8125rem] text-[rgba(0,0,0,0.4)]">
-                      Скопіюйте Bio прямо з Instagram — так аналіз буде точнішим
+                      Перевірте і відредагуйте — чим точніше, тим кращий аудит
                     </p>
                   </div>
 
@@ -227,9 +411,6 @@ export default function LiteTool() {
                         </option>
                       ))}
                     </select>
-                    <p className="text-[0.8125rem] text-[rgba(0,0,0,0.4)]">
-                      Допомагає оцінити відповідність Bio вашому оферу
-                    </p>
                   </div>
 
                   {/* Client transformation */}
@@ -242,28 +423,13 @@ export default function LiteTool() {
                       type="text"
                       value={form.clientTransformation}
                       onChange={e => handleChange('clientTransformation', e.target.value)}
-                      placeholder="Напр.: мінус 8-12 кг за 3 місяці без дієт"
+                      placeholder="Напр.: мінус 8–12 кг за 3 місяці без дієт"
                       maxLength={150}
                       className="h-10 px-4 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors placeholder:text-[rgba(0,0,0,0.3)]"
                     />
                     <p className="text-[0.8125rem] text-[rgba(0,0,0,0.4)]">
                       Конкретний результат — основа для переписаного Bio
                     </p>
-                  </div>
-
-                  {/* Instagram URL */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[0.875rem] fw-480 tracking-[-0.1px]">
-                      Посилання на Instagram{' '}
-                      <span className="fw-330 text-[rgba(0,0,0,0.4)]">(необов'язково)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.instagramUrl}
-                      onChange={e => handleChange('instagramUrl', e.target.value)}
-                      placeholder="@handle або https://instagram.com/..."
-                      className="h-10 px-4 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors placeholder:text-[rgba(0,0,0,0.3)]"
-                    />
                   </div>
 
                   <div className="flex flex-col items-stretch gap-2 pt-1">
