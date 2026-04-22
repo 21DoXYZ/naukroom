@@ -217,6 +217,18 @@ router.post('/marketing-pack', async (req: AuthRequest, res) => {
       }
     }
 
+    // Trim large content_pack: pass only first 3 scripts + connectionMap + calendar
+    // to keep the marketing-pack-composer prompt within reasonable size
+    if (latestByType.content_pack && typeof latestByType.content_pack === 'object') {
+      const cp = latestByType.content_pack as Record<string, unknown>
+      latestByType.content_pack = {
+        scripts: Array.isArray(cp.scripts) ? cp.scripts.slice(0, 3) : [],
+        connectionMap: Array.isArray(cp.connectionMap) ? cp.connectionMap.slice(0, 3) : [],
+        contentCalendar: cp.contentCalendar,
+        hashtagSets: cp.hashtagSets,
+      }
+    }
+
     const pack = await composeMarketingPack(
       profile as Record<string, unknown>,
       latestByType
