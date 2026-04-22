@@ -110,7 +110,7 @@ export default function LiteLanding() {
         </motion.p>
         <motion.h1
           initial="hidden" animate="visible" variants={spring} custom={1}
-          className="text-[2.6rem] md:text-[3.5rem] fw-320 tracking-[-2px] leading-[1.05] max-w-[620px] mb-5"
+          className="text-[1.875rem] sm:text-[2.6rem] md:text-[3.5rem] fw-320 tracking-[-2px] leading-[1.05] max-w-[620px] mb-5"
         >
           Дізнайтеся, чому ваш Instagram не приводить до заявок
         </motion.h1>

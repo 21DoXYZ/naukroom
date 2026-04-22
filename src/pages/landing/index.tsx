@@ -65,7 +65,7 @@ export default function Landing() {
           AI-маркетинг для health-експертів
         </motion.div>
         <motion.h1 initial="hidden" animate="visible" variants={spring} custom={1}
-          className="text-[3.5rem] md:text-[4.5rem] fw-320 tracking-[-2px] leading-[1.05] max-w-[720px] mb-6">
+          className="text-[1.875rem] sm:text-[3.5rem] md:text-[4.5rem] fw-320 tracking-[-2px] leading-[1.05] max-w-[720px] mb-6">
           Система, яка допоможе зібрати ваш Instagram у воронку клієнтів
         </motion.h1>
         <motion.p initial="hidden" animate="visible" variants={spring} custom={2}
@@ -73,7 +73,7 @@ export default function Landing() {
           Отримайте аудит профілю, сильний офер, упаковку, лід-магніт, просту воронку в Direct і контент, який веде до консультацій — без хаосу і без десятка окремих сервісів.
         </motion.p>
         <motion.div initial="hidden" animate="visible" variants={spring} custom={3}
-          className="flex items-center gap-3">
+          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Button size="lg" onClick={() => navigate('/register')}>
             Отримати ранній доступ <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
@@ -224,7 +224,7 @@ export default function Landing() {
             viewport={{ once: true }} transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
             <p className="type-mono-label text-white/40 mb-3">Готові спробувати?</p>
-            <h2 className="text-[2.5rem] fw-320 tracking-[-1px] leading-[1.05] mb-8 max-w-[560px] text-white">
+            <h2 className="text-[1.75rem] sm:text-[2.5rem] fw-320 tracking-[-1px] leading-[1.05] mb-8 max-w-[560px] text-white">
               Отримайте ранній доступ до Naukroom
             </h2>
             <Button size="lg"

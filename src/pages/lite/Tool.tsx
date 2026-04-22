@@ -225,7 +225,7 @@ export default function LiteTool() {
         </div>
       </header>
 
-      <div className="flex-1 flex items-start justify-center px-5 py-12">
+      <div className="flex-1 flex items-start justify-center px-5 py-8 sm:py-12">
         <div className="w-full max-w-[480px]">
           <AnimatePresence mode="wait">
             {stage === 'form' && (
@@ -237,7 +237,7 @@ export default function LiteTool() {
                 transition={{ type: 'spring', stiffness: 260, damping: 28 }}
               >
                 <p className="type-mono-label text-[rgba(0,0,0,0.4)] mb-3">AI-аудит профілю</p>
-                <h1 className="text-[1.75rem] fw-400 tracking-[-0.7px] leading-[1.15] mb-2">
+                <h1 className="text-[1.375rem] sm:text-[1.75rem] fw-400 tracking-[-0.7px] leading-[1.15] mb-2">
                   Розкажіть про ваш профіль
                 </h1>
                 <p className="type-body text-[rgba(0,0,0,0.55)] mb-8">
@@ -258,14 +258,14 @@ export default function LiteTool() {
                         onChange={e => handleChange('instagramUrl', e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && canFetch && (e.preventDefault(), fetchInstagramProfile())}
                         placeholder="@handle або instagram.com/..."
-                        className="flex-1 h-10 px-4 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors placeholder:text-[rgba(0,0,0,0.3)]"
+                        className="flex-1 h-11 px-4 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors placeholder:text-[rgba(0,0,0,0.3)]"
                       />
                       <button
                         type="button"
                         onClick={fetchInstagramProfile}
                         disabled={!canFetch}
                         className={[
-                          'h-10 px-4 rounded-[8px] border text-[0.875rem] fw-480 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer',
+                          'h-11 px-4 rounded-[8px] border text-[0.875rem] fw-480 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer',
                           canFetch
                             ? 'border-black/20 hover:border-black/40 hover:bg-black/[0.03] text-[rgba(0,0,0,0.7)]'
                             : 'border-black/8 text-[rgba(0,0,0,0.25)] cursor-not-allowed',

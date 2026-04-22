@@ -234,7 +234,7 @@ export default function LiteResult() {
             <Sparkles className="h-4 w-4 text-[oklch(0.52_0.24_285)]" />
             <p className="type-mono-label text-[rgba(0,0,0,0.4)]">AI-аудит профілю</p>
           </div>
-          <h1 className="text-[1.75rem] fw-400 tracking-[-0.7px] leading-[1.15] mb-1">
+          <h1 className="text-[1.375rem] sm:text-[1.75rem] fw-400 tracking-[-0.7px] leading-[1.15] mb-1">
             Ось що заважає вашому профілю продавати
           </h1>
           {input?.profession && (
@@ -243,7 +243,7 @@ export default function LiteResult() {
 
           {/* Score + verdict */}
           <div className="rounded-[8px] border border-black/10 overflow-hidden">
-            <div className="flex items-center gap-5 p-5 border-b border-black/8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 p-5 border-b border-black/8">
               <div className="flex flex-col items-center shrink-0">
                 <span
                   className="text-[2.5rem] fw-540 tracking-[-1.5px] leading-none"
@@ -253,7 +253,7 @@ export default function LiteResult() {
                 </span>
                 <span className="text-[0.7rem] fw-400 text-[rgba(0,0,0,0.35)] mt-0.5 tabular-nums">/ 100</span>
               </div>
-              <div className="h-10 w-px bg-black/8 shrink-0" />
+              <div className="hidden sm:block h-10 w-px bg-black/8 shrink-0" />
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   {criticalCount > 0 && (
@@ -374,7 +374,7 @@ export default function LiteResult() {
 
             {/* Strategy tabs */}
             {audit.bioVariants.length > 1 && (
-              <div className="flex px-5 pt-4 gap-2 flex-wrap">
+              <div className="flex px-5 pt-4 gap-2 overflow-x-auto flex-nowrap pb-0.5">
                 {audit.bioVariants.map((v, i) => {
                   const strategy = getBioStrategy(v)
                   return (
@@ -479,7 +479,7 @@ export default function LiteResult() {
         {/* Full version preview */}
         <motion.div {...spring(6)} className="rounded-[8px] border border-black/10 p-5">
           <p className="type-mono-label text-[rgba(0,0,0,0.4)] mb-3">Що є у повній версії</p>
-          <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
             {FULL_MODULES.map((m, i) => (
               <div key={i} className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: m.color }} />
@@ -509,7 +509,7 @@ export default function LiteResult() {
                 whileTap={{ scale: 0.99 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 className={[
-                  'w-full text-left rounded-[8px] border px-5 py-4 transition-colors cursor-pointer',
+                  'w-full text-left rounded-[8px] border px-5 py-5 transition-colors cursor-pointer',
                   step.primary
                     ? 'border-[oklch(0.52_0.24_285/0.4)] bg-[oklch(0.52_0.24_285/0.04)] hover:bg-[oklch(0.52_0.24_285/0.08)]'
                     : 'border-black/10 hover:border-black/20 hover:bg-black/[0.02]',
