@@ -15,6 +15,7 @@ import { aiLimiter } from './middleware/rateLimit.js'
 void db
 
 const app = express()
+app.set('trust proxy', 1) // Trust Railway's reverse proxy for correct IP detection
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())

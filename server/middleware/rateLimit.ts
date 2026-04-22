@@ -23,7 +23,9 @@ export const liteAuditLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    return req.ip ?? req.headers['x-forwarded-for']?.toString() ?? 'unknown'
+    const forwarded = req.headers['x-forwarded-for']
+    const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(',')[0]) ?? req.ip ?? 'unknown'
+    return ip.trim()
   },
 })
 
