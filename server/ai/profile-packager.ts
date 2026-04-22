@@ -68,7 +68,7 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 2500,
+    max_tokens: 3500,
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: prompt }],
   })
@@ -77,7 +77,8 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     return JSON.parse(text) as ProfilePackaging
-  } catch {
+  } catch (err) {
+    console.error('[profile-packager] JSON parse failed:', err, '\nRaw (first 300):', text.slice(0, 300))
     return {
       bioVariants: [],
       highlightsStructure: [],

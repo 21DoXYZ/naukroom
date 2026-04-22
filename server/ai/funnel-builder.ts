@@ -126,7 +126,7 @@ ${nicheCtx}
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 2000,
+    max_tokens: 3500,
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: prompt }],
   })
@@ -135,7 +135,8 @@ ${nicheCtx}
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     return JSON.parse(text) as FunnelResult
-  } catch {
+  } catch (err) {
+    console.error('[funnel-builder] JSON parse failed:', err, '\nRaw (first 300):', text.slice(0, 300))
     return {
       goal: '', trigger_content: '', code_word: '', first_dm: '',
       follow_up_1: '', follow_up_2: '', handoff_to_expert: '', conversion_target: '',
