@@ -24,6 +24,18 @@ const GENERATORS: Record<string, (p: Record<string, unknown>) => Promise<unknown
 }
 
 const router = Router()
+
+// TEMPORARY: remove after admin testing
+router.post('/setup', (req, res) => {
+  const { secret, userId } = req.body as { secret?: string; userId?: string }
+  if (secret !== (process.env.ADMIN_SETUP_SECRET || 'naukroom-setup-2024')) {
+    res.status(403).json({ error: 'Forbidden' }); return
+  }
+  if (!userId) { res.status(400).json({ error: 'userId required' }); return }
+  db.update(users).set({ role: 'admin' as 'admin' | 'user' }).where(eq(users.id, userId)).run()
+  res.json({ ok: true })
+})
+
 router.use(requireAdmin)
 
 router.get('/lite-submissions', (_req, res) => {
