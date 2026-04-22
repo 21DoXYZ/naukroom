@@ -28,9 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const u = await api.get<User>('/auth/me')
       setUser(u)
-    } catch {
-      setUser(null)
-      clearToken()
+    } catch (err) {
+      // Only hard-logout on explicit 401 (invalid/expired token).
+      // 404/500 may be transient server issues — preserve the session.
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('401') || msg.toLowerCase().includes('unauthorized')) {
+        setUser(null)
+        clearToken()
+      }
     }
   }
 

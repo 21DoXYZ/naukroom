@@ -83,8 +83,8 @@ export default function Onboarding() {
     try {
       try { await saveProgress(data) } catch { /* non-blocking */ }
       await api.post('/onboarding/complete', {})
-      await refreshUser()
       navigate('/onboarding/result')
+      refreshUser().catch(() => { /* background refresh, non-blocking */ })
     } finally {
       setSaving(false)
     }
