@@ -25,11 +25,6 @@ interface MarketingPack {
   sections: MarketingPackSection[]
 }
 
-interface SSEResult {
-  result: MarketingPack
-  outputId: string
-}
-
 const spring = {
   hidden: { opacity: 0, y: 16, filter: 'blur(4px)' },
   visible: (i: number) => ({
@@ -136,9 +131,9 @@ export default function MarketingPackPage() {
     setLoading(true)
     setError('')
     setPack(null)
-    await ssePost<SSEResult>(
+    await ssePost<MarketingPack>(
       '/generate/marketing-pack',
-      ({ result }) => { setPack(result); setLoading(false) },
+      (result) => { setPack(result); setLoading(false) },
       (msg) => { setError(msg); setLoading(false) }
     )
   }
