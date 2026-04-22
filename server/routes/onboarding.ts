@@ -9,10 +9,24 @@ import { track } from '../analytics.js'
 const router = Router()
 router.use(requireAuth)
 
+const ARRAY_FIELDS = new Set(['goals', 'postScreenshots'])
+
+function deserializeProfile(profile: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+  for (const [key, val] of Object.entries(profile)) {
+    if (ARRAY_FIELDS.has(key) && typeof val === 'string') {
+      try { result[key] = JSON.parse(val) } catch { result[key] = [] }
+    } else {
+      result[key] = val
+    }
+  }
+  return result
+}
+
 router.get('/profile', (req: AuthRequest, res) => {
   const profile = db.select().from(businessProfiles)
     .where(eq(businessProfiles.userId, req.userId!)).get()
-  res.json(profile ?? null)
+  res.json(profile ? deserializeProfile(profile as Record<string, unknown>) : null)
 })
 
 function serializeFields(data: Record<string, unknown>): Record<string, unknown> {
