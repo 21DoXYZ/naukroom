@@ -39,7 +39,8 @@ export async function improveAnswer(question: string, answer: string): Promise<I
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const text = msg.content[0].type === 'text' ? msg.content[0].text : '{}'
+  const raw = msg.content[0].type === 'text' ? msg.content[0].text : '{}'
+  const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     return JSON.parse(text) as ImproveResult
   } catch {

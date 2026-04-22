@@ -84,7 +84,8 @@ ${JSON.stringify(outputs, null, 2)}
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const text = msg.content[0].type === 'text' ? msg.content[0].text : '{}'
+  const raw = msg.content[0].type === 'text' ? msg.content[0].text : '{}'
+  const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     return JSON.parse(text) as MarketingPack
   } catch {
