@@ -68,7 +68,7 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 1500,
+    max_tokens: 2500,
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: prompt }],
   })
