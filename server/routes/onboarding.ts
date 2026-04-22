@@ -15,8 +15,17 @@ router.get('/profile', (req: AuthRequest, res) => {
   res.json(profile ?? null)
 })
 
+function serializeFields(data: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+  for (const [key, val] of Object.entries(data)) {
+    result[key] = Array.isArray(val) ? JSON.stringify(val) : val
+  }
+  return result
+}
+
 router.post('/profile', (req: AuthRequest, res) => {
-  const data = req.body as Record<string, unknown>
+  const raw = req.body as Record<string, unknown>
+  const data = serializeFields(raw)
   const now = new Date()
 
   const existing = db.select().from(businessProfiles)

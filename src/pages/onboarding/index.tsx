@@ -81,7 +81,7 @@ export default function Onboarding() {
   async function finish(data: OnboardingData) {
     setSaving(true)
     try {
-      await saveProgress(data)
+      try { await saveProgress(data) } catch { /* non-blocking */ }
       await api.post('/onboarding/complete', {})
       await refreshUser()
       navigate('/onboarding/result')
