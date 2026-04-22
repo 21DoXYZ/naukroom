@@ -12,6 +12,7 @@ type ContentType = 'expert' | 'engaging' | 'selling' | 'pain' | 'objection'
 interface ReelsScript {
   title: string
   contentType: ContentType
+  relatedOffer: string
   leadMagnetLink: string
   painItCloses: string
   hook: string
@@ -108,17 +109,23 @@ function ScriptCard({ script, index }: { script: ReelsScript; index: number }) {
               className="overflow-hidden"
             >
               <div className="pt-4 mt-4 border-t border-black/8">
-                {/* Pain + lead magnet */}
+                {/* Pain + lead magnet + offer */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="p-3 rounded-[6px] bg-black/[0.025] border border-black/8">
                     <p className="type-mono-label text-[rgba(0,0,0,0.35)] mb-1">Яку біль закриває</p>
                     <p className="type-body text-[rgba(0,0,0,0.7)]">{script.painItCloses}</p>
                   </div>
                   <div className="p-3 rounded-[6px] bg-black/[0.025] border border-black/8">
-                    <p className="type-mono-label text-[rgba(0,0,0,0.35)] mb-1">Веде до лід-магніта</p>
+                    <p className="type-mono-label text-[rgba(0,0,0,0.35)] mb-1">Лід-магніт</p>
                     <p className="type-body text-[rgba(0,0,0,0.7)]">{script.leadMagnetLink}</p>
                   </div>
                 </div>
+                {script.relatedOffer && (
+                  <div className="p-3 rounded-[6px] bg-black/[0.025] border border-black/8 mb-4">
+                    <p className="type-mono-label text-[rgba(0,0,0,0.35)] mb-1">Веде до офера</p>
+                    <p className="type-body text-[rgba(0,0,0,0.7)]">{script.relatedOffer}</p>
+                  </div>
+                )}
 
                 {/* Hook */}
                 <div className="p-3 rounded-[6px] bg-black/[0.03] border border-black/8 mb-4">
