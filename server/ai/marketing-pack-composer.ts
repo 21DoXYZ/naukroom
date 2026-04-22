@@ -79,7 +79,7 @@ ${JSON.stringify(outputs, null, 2)}
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 3000,
+    max_tokens: 6000,
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: prompt }],
   })
@@ -88,7 +88,8 @@ ${JSON.stringify(outputs, null, 2)}
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     return JSON.parse(text) as MarketingPack
-  } catch {
+  } catch (err) {
+    console.error('[marketing-pack-composer] JSON parse failed:', err, '\nRaw (first 300):', text.slice(0, 300))
     return {
       expertName: '', niche: '', positioning: '', coreBio: '',
       coreOffer: '', leadMagnet: '', funnelOverview: '', contentStrategy: '',

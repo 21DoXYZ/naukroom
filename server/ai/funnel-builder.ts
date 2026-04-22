@@ -126,7 +126,7 @@ ${nicheCtx}
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 3500,
+    max_tokens: 6000,
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: prompt }],
   })
