@@ -119,6 +119,7 @@ export default function ValueMoment() {
               </button>
             </div>
             <p className="text-[1.125rem] fw-330 tracking-[-0.1px] leading-[1.55]">{summary.draftBio}</p>
+            <p className={`type-mono-label mt-2 ${summary.draftBio.length > 150 ? 'text-red-500' : 'text-[rgba(0,0,0,0.3)]'}`}>{summary.draftBio.length}/150 символів</p>
           </Card>
         </motion.div>
 

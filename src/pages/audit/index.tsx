@@ -178,7 +178,10 @@ export default function ProfileAudit() {
               <Card key={i}>
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <span className="type-mono-label text-[rgba(0,0,0,0.35)]">Варіант {i + 1}</span>
-                  <CopyButton text={bio} />
+                  <div className="flex items-center gap-3">
+                    <span className={`type-mono-label ${bio.length > 150 ? 'text-red-500' : 'text-[rgba(0,0,0,0.3)]'}`}>{bio.length}/150</span>
+                    <CopyButton text={bio} />
+                  </div>
                 </div>
                 <p className="text-[1rem] fw-330 tracking-[-0.1px] leading-[1.55]">{bio}</p>
               </Card>

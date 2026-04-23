@@ -217,6 +217,7 @@ export default function MarketingPackPage() {
                   <div className="flex-1">
                     <p className="type-mono-label text-[rgba(0,0,0,0.35)] mb-1">Bio</p>
                     <p className="type-body font-mono text-[0.875rem]">{pack.coreBio}</p>
+                    <p className={`type-mono-label mt-1 ${pack.coreBio.length > 150 ? 'text-red-500' : 'text-[rgba(0,0,0,0.3)]'}`}>{pack.coreBio.length}/150</p>
                   </div>
                   <CopyBtn text={pack.coreBio} />
                 </div>

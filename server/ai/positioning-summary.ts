@@ -20,7 +20,8 @@ const SYSTEM = `Ти — стратег з позиціонування для h
 - Тільки українська мова
 - Жодного GPT-стилю: ніяких "звісно", "безумовно", "підсумовуючи", "насамперед варто зазначити"
 - Все конкретно і застосовно одразу — формулюй як маркетолог-практик, не як ChatGPT
-- Bio максимум 150 символів, без хештегів, з чітким CTA
+- Bio СТРОГО ≤150 символів (Instagram-ліміт). Порахуй перед видачею. Краще 120-140 символів ніж 151.
+- Поле "Ім'я" профілю СТРОГО ≤30 символів
 - Позиціонування має включати: для кого, яку проблему, яким методом, який результат
 - ЗАБОРОНЕНО: "допомагаю знайти баланс", "підтримую на шляху", "трансформація", "автентичність", "проявити себе"
 - Відповідай JSON без markdown-блоків`
@@ -59,7 +60,9 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
   const raw = msg.content[0].type === 'text' ? msg.content[0].text : '{}'
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
-    return JSON.parse(text) as PositioningSummary
+    const result = JSON.parse(text) as PositioningSummary
+    if (result.draftBio) result.draftBio = result.draftBio.slice(0, 150)
+    return result
   } catch {
     return {
       whoYouAre: '',

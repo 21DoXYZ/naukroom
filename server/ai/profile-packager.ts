@@ -17,7 +17,8 @@ const SYSTEM = `Ти — Instagram-стратег та копірайтер дл
 
 Правила:
 - Тільки українська мова
-- Bio — ≤150 символів, без хештегів, з чітким CTA (не "підписуйтесь", а конкретна дія)
+- Bio — СТРОГО ≤150 символів (Instagram-ліміт), без хештегів, з чітким CTA (не "підписуйтесь", а конкретна дія). Порахуй символи перед видачею.
+- profileNameVariants — СТРОГО ≤30 символів кожен (ліміт поля "Ім'я" в Instagram)
 - Без GPT-стилю та канцелярщини
 - Кожен Highlights має очевидну назву і конкретний зміст
 - Закріплені пости: 3 пости, що відповідають на "хто ти", "що ти продаєш", "як тобі можна довіряти"
@@ -76,7 +77,12 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
   const raw = msg.content[0].type === 'text' ? msg.content[0].text : '{}'
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
-    return JSON.parse(text) as ProfilePackaging
+    const result = JSON.parse(text) as ProfilePackaging
+    if (Array.isArray(result.bioVariants))
+      result.bioVariants = result.bioVariants.map(b => b.slice(0, 150))
+    if (Array.isArray(result.profileNameVariants))
+      result.profileNameVariants = result.profileNameVariants.map(n => n.slice(0, 30))
+    return result
   } catch (err) {
     console.error('[profile-packager] JSON parse failed:', err, '\nRaw (first 300):', text.slice(0, 300))
     return {
