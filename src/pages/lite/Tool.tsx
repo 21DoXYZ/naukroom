@@ -368,8 +368,11 @@ export default function LiteTool() {
                           </span>
                         )}
                       </label>
-                      <span className="text-[0.75rem] text-[rgba(0,0,0,0.35)]">
-                        {form.bio.length}/500
+                      <span className={[
+                        'text-[0.75rem] tabular-nums',
+                        form.bio.length > 150 ? 'text-[oklch(0.60_0.20_22)]' : 'text-[rgba(0,0,0,0.35)]',
+                      ].join(' ')}>
+                        {form.bio.length}/150
                       </span>
                     </div>
                     <textarea
@@ -381,7 +384,7 @@ export default function LiteTool() {
                           ? 'Завантажуємо з Instagram...'
                           : 'Вставте текст вашого Bio або відредагуйте завантажений'
                       }
-                      maxLength={500}
+                      maxLength={150}
                       rows={4}
                       className="px-4 py-3 rounded-[8px] border border-black/15 text-[0.9375rem] fw-330 outline-none focus:border-black/40 transition-colors resize-none leading-[1.5] placeholder:text-[rgba(0,0,0,0.3)]"
                     />

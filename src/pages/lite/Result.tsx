@@ -400,10 +400,18 @@ export default function LiteResult() {
                 {getBioText(audit.bioVariants[activeBioIdx])}
               </p>
             </div>
-            <div className="px-5 py-3 border-t border-black/6">
+            <div className="px-5 py-3 border-t border-black/6 flex items-center justify-between gap-3">
               <p className="text-[0.8125rem] text-[rgba(0,0,0,0.4)]">
                 Адаптуйте під себе: замініть загальні фрази на ваші конкретні цифри і деталі
               </p>
+              <span className={[
+                'text-[0.75rem] fw-500 tabular-nums shrink-0',
+                getBioText(audit.bioVariants[activeBioIdx]).length > 150
+                  ? 'text-[oklch(0.60_0.20_22)]'
+                  : 'text-[rgba(0,0,0,0.35)]',
+              ].join(' ')}>
+                {getBioText(audit.bioVariants[activeBioIdx]).length}/150
+              </span>
             </div>
           </motion.div>
         )}
