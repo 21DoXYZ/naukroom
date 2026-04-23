@@ -263,13 +263,17 @@ export default function AdminUserDetail() {
 
   const { user, profile, outputs } = detail
 
-  const avgQA = outputs.length
-    ? Math.round(
-        outputs.reduce((sum, o) => {
-          try { return sum + (JSON.parse(o.qaScore ?? '{}') as QAResult).score } catch { return sum + 75 }
-        }, 0) / outputs.length
-      )
-    : null
+  const avgQA = (() => {
+    const withQA = outputs.filter(o => o.qaScore)
+    if (!withQA.length) return null
+    const total = withQA.reduce((sum, o) => {
+      try {
+        const qa = JSON.parse(o.qaScore!) as QAResult
+        return typeof qa.score === 'number' ? sum + qa.score : sum
+      } catch { return sum }
+    }, 0)
+    return Math.round(total / withQA.length)
+  })()
 
   return (
     <div className="min-h-screen bg-white">
