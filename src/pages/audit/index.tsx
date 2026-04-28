@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { ssePost } from '@/lib/sse'
+import { api } from '@/lib/api'
 
 interface AuditScore {
   category: string
@@ -73,9 +74,20 @@ export default function ProfileAudit() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  useEffect(() => { fetchAudit() }, [])
+  useEffect(() => { loadAudit() }, [])
 
-  async function fetchAudit() {
+  async function loadAudit() {
+    try {
+      const cached = await api.get<{ result: ProfileAudit }>('/generate/output/profile_audit')
+      setAudit(cached.result)
+    } catch {
+      await generateAudit()
+    }
+  }
+
+  async function generateAudit() {
+    setAudit(null)
+    setError('')
     try {
       await ssePost<ProfileAudit>('/generate/profile-audit', setAudit, setError)
     } catch (err) {
@@ -219,9 +231,12 @@ export default function ProfileAudit() {
           </Card>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={spring} custom={6}>
+        <motion.div initial="hidden" animate="visible" variants={spring} custom={6} className="flex items-center gap-3">
           <Button size="lg" onClick={() => navigate('/dashboard')}>
             До кабінету <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Button>
+          <Button size="lg" variant="ghost" onClick={generateAudit}>
+            Перегенерувати
           </Button>
         </motion.div>
       </div>

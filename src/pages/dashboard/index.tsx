@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Circle, Lock, ChevronRight, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/lib/auth'
+import { api } from '@/lib/api'
 
 interface RoadmapStep {
   id: string
@@ -24,6 +26,20 @@ export default function Dashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const onboardingDone = user?.onboardingStatus === 'completed'
+  const [completedOutputs, setCompletedOutputs] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!onboardingDone) return
+    api.get<{ types: string[] }>('/generate/completed-types')
+      .then(d => setCompletedOutputs(new Set(d.types)))
+      .catch(() => {})
+  }, [onboardingDone])
+
+  function stepStatus(outputType: string | null): 'done' | 'available' | 'locked' {
+    if (!onboardingDone) return 'locked'
+    if (outputType && completedOutputs.has(outputType)) return 'done'
+    return 'available'
+  }
 
   const steps: RoadmapStep[] = [
     {
@@ -35,49 +51,49 @@ export default function Dashboard() {
     {
       id: 'positioning', label: 'Позиціонування',
       description: 'Хто ви, для кого працюєте, у чому ваша цінність',
-      status: onboardingDone ? 'done' : 'locked',
+      status: onboardingDone ? stepStatus('positioning_summary') : 'locked',
       href: '/onboarding/result',
     },
     {
       id: 'profile_audit', label: 'Аудит профілю',
       description: 'Аналіз Instagram-профілю — що працює, що ні',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('profile_audit'),
       href: '/audit',
     },
     {
       id: 'offer', label: 'Офер і продуктова лінійка',
       description: 'Core offer, додаткові послуги, що просувати першим',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('offer'),
       href: '/offer',
     },
     {
       id: 'packaging', label: 'Упаковка профілю',
       description: '3 варіанти Bio, highlights, pinned posts',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('profile_packaging'),
       href: '/packaging',
     },
     {
       id: 'lead_magnet', label: 'Лідмагніти',
       description: '1–3 лідмагніти, прив\'язані до болів та оферу',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('lead_magnet'),
       href: '/lead-magnet',
     },
     {
       id: 'funnel', label: 'Воронка',
       description: 'Reels → Direct → follow-up → консультація',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('funnel'),
       href: '/funnel',
     },
     {
       id: 'content', label: 'Контент-план',
       description: '10 Reels-сценаріїв з хуками, сценами та CTA',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('content_pack'),
       href: '/content',
     },
     {
       id: 'export', label: 'Маркетинг-пак',
       description: 'Підсумковий експорт усіх матеріалів',
-      status: onboardingDone ? 'available' : 'locked',
+      status: stepStatus('marketing_pack'),
       href: '/export',
     },
   ]

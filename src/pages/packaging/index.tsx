@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { ssePost } from '@/lib/sse'
+import { api } from '@/lib/api'
 
 interface ProfilePackaging {
   bioVariants: string[]
@@ -39,25 +40,31 @@ function CopyBtn({ text }: { text: string }) {
   )
 }
 
-function useSSEFetch<T>(path: string) {
-  const [data, setData] = useState<T | null>(null)
-  const [error, setError] = useState('')
-  useEffect(() => {
-    async function fetch_() {
-      try {
-        await ssePost<T>(path, d => setData(d), e => setError(e))
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Помилка підключення')
-      }
-    }
-    fetch_()
-  }, [path])
-  return { data, error }
-}
-
 export default function ProfilePackaging() {
+  const [pkg, setPkg] = useState<ProfilePackaging | null>(null)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { data: pkg, error } = useSSEFetch<ProfilePackaging>('/generate/profile-packaging')
+
+  useEffect(() => { loadPkg() }, [])
+
+  async function loadPkg() {
+    try {
+      const cached = await api.get<{ result: ProfilePackaging }>('/generate/output/profile_packaging')
+      setPkg(cached.result)
+    } catch {
+      await generatePkg()
+    }
+  }
+
+  async function generatePkg() {
+    setPkg(null)
+    setError('')
+    try {
+      await ssePost<ProfilePackaging>('/generate/profile-packaging', setPkg, setError)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Помилка підключення')
+    }
+  }
 
   if (error) return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
@@ -176,9 +183,12 @@ export default function ProfilePackaging() {
           </div>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={spring} custom={5}>
+        <motion.div initial="hidden" animate="visible" variants={spring} custom={5} className="flex items-center gap-3">
           <Button size="lg" onClick={() => navigate('/dashboard')}>
             До кабінету <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Button>
+          <Button size="lg" variant="ghost" onClick={generatePkg}>
+            Перегенерувати
           </Button>
         </motion.div>
       </div>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { ssePost } from '@/lib/sse'
+import { api } from '@/lib/api'
 
 interface OfferItem {
   name: string
@@ -83,9 +84,20 @@ export default function OfferBuilder() {
   const [hookCopied, setHookCopied] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(() => { fetchOffer() }, [])
+  useEffect(() => { loadOffer() }, [])
 
-  async function fetchOffer() {
+  async function loadOffer() {
+    try {
+      const cached = await api.get<{ result: OfferResult }>('/generate/output/offer')
+      setOffer(cached.result)
+    } catch {
+      await generateOffer()
+    }
+  }
+
+  async function generateOffer() {
+    setOffer(null)
+    setError('')
     try {
       await ssePost<OfferResult>('/generate/offer', setOffer, setError)
     } catch (err) {
@@ -179,9 +191,12 @@ export default function OfferBuilder() {
           </Card>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={spring} custom={6}>
+        <motion.div initial="hidden" animate="visible" variants={spring} custom={6} className="flex items-center gap-3">
           <Button size="lg" onClick={() => navigate('/dashboard')}>
             До кабінету <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Button>
+          <Button size="lg" variant="ghost" onClick={generateOffer}>
+            Перегенерувати
           </Button>
         </motion.div>
       </div>

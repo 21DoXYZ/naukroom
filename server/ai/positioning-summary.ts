@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { buildNicheContext, GOLDEN_EXAMPLES } from './niche-context.js'
+import { cleanBio } from './utils.js'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -61,7 +62,7 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     const result = JSON.parse(text) as PositioningSummary
-    if (result.draftBio) result.draftBio = result.draftBio.slice(0, 150)
+    if (result.draftBio) result.draftBio = cleanBio(result.draftBio)
     return result
   } catch {
     return {

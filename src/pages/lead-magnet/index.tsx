@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { ssePost } from '@/lib/sse'
+import { api } from '@/lib/api'
 
 interface LeadMagnetConcept {
   title: string
@@ -51,16 +52,23 @@ export default function LeadMagnetPage() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    async function fetch_() {
-      try {
-        await ssePost<LeadMagnetResult>('/generate/lead-magnets', setData, setError)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Помилка підключення')
-      }
+  useEffect(() => { loadData() }, [])
+
+  async function loadData() {
+    try {
+      const cached = await api.get<{ result: LeadMagnetResult }>('/generate/output/lead_magnet')
+      setData(cached.result)
+    } catch { await generateData() }
+  }
+
+  async function generateData() {
+    setData(null); setError('')
+    try {
+      await ssePost<LeadMagnetResult>('/generate/lead-magnets', setData, setError)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Помилка підключення')
     }
-    fetch_()
-  }, [])
+  }
 
   if (error) return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
@@ -147,10 +155,11 @@ export default function LeadMagnetPage() {
           </Card>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={spring} custom={data.concepts.length + 2}>
+        <motion.div initial="hidden" animate="visible" variants={spring} custom={data.concepts.length + 2} className="flex items-center gap-3">
           <Button size="lg" onClick={() => navigate('/dashboard')}>
             До кабінету <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
+          <Button size="lg" variant="ghost" onClick={generateData}>Перегенерувати</Button>
         </motion.div>
       </div>
     </div>

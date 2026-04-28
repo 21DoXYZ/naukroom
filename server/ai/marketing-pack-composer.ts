@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { cleanBio } from './utils.js'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -89,7 +90,7 @@ ${JSON.stringify(outputs, null, 2)}
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
   try {
     const result = JSON.parse(text) as MarketingPack
-    if (result.coreBio) result.coreBio = result.coreBio.slice(0, 150)
+    if (result.coreBio) result.coreBio = cleanBio(result.coreBio)
     return result
   } catch (err) {
     console.error('[marketing-pack-composer] JSON parse failed:', err, '\nRaw (first 300):', text.slice(0, 300))

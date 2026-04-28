@@ -19,6 +19,31 @@ import { track } from '../analytics.js'
 const router = Router()
 router.use(requireAuth)
 
+// Return list of output types the user has already generated
+router.get('/completed-types', (req: AuthRequest, res) => {
+  const rows = db.select({ type: generatedOutputs.type }).from(generatedOutputs)
+    .where(eq(generatedOutputs.userId, req.userId!))
+    .all()
+  const types = [...new Set(rows.map(r => r.type))]
+  res.json({ types })
+})
+
+// Return the most recent saved output of a given type for the current user
+router.get('/output/:type', (req: AuthRequest, res) => {
+  const { type } = req.params
+  const row = db.select().from(generatedOutputs)
+    .where(eq(generatedOutputs.userId, req.userId!))
+    .orderBy(desc(generatedOutputs.createdAt))
+    .all()
+    .find(r => r.type === type)
+  if (!row) { res.status(404).json({ error: 'not_found' }); return }
+  try {
+    res.json({ result: JSON.parse(row.content), outputId: row.id })
+  } catch {
+    res.status(404).json({ error: 'not_found' })
+  }
+})
+
 router.post('/improve-answer', async (req: AuthRequest, res) => {
   const { question, answer } = req.body as { question?: string; answer?: string }
   if (!question || !answer) {
@@ -45,9 +70,11 @@ router.post('/positioning-summary', async (req: AuthRequest, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.write('data: {"status":"generating"}\n\n')
+  const ka1 = setInterval(() => { try { res.write(': ping\n\n') } catch { /* */ } }, 5000)
 
   try {
     const summary = await generatePositioningSummary(profile as Record<string, unknown>)
+    clearInterval(ka1)
     const qa = await runQA('positioning_summary', summary as Record<string, unknown>)
 
     const id = randomUUID()
@@ -64,6 +91,7 @@ router.post('/positioning-summary', async (req: AuthRequest, res) => {
     res.write(`data: ${JSON.stringify({ status: 'done', result: summary, outputId: id, qa })}\n\n`)
     res.end()
   } catch (err) {
+    clearInterval(ka1)
     const msg = err instanceof Error ? err.message : 'Помилка генерації'
     res.write(`data: ${JSON.stringify({ status: 'error', error: msg })}\n\n`)
     res.end()
@@ -82,9 +110,11 @@ router.post('/profile-audit', async (req: AuthRequest, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.write('data: {"status":"generating"}\n\n')
+  const ka2 = setInterval(() => { try { res.write(': ping\n\n') } catch { /* */ } }, 5000)
 
   try {
     const audit = await generateProfileAudit(profile as Record<string, unknown>)
+    clearInterval(ka2)
     const qa = await runQA('profile_audit', audit as Record<string, unknown>)
 
     const id = randomUUID()
@@ -101,6 +131,7 @@ router.post('/profile-audit', async (req: AuthRequest, res) => {
     res.write(`data: ${JSON.stringify({ status: 'done', result: audit, outputId: id, qa })}\n\n`)
     res.end()
   } catch (err) {
+    clearInterval(ka2)
     const msg = err instanceof Error ? err.message : 'Помилка генерації'
     res.write(`data: ${JSON.stringify({ status: 'error', error: msg })}\n\n`)
     res.end()
@@ -119,9 +150,11 @@ router.post('/offer', async (req: AuthRequest, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.write('data: {"status":"generating"}\n\n')
+  const ka3 = setInterval(() => { try { res.write(': ping\n\n') } catch { /* */ } }, 5000)
 
   try {
     const offer = await generateOffer(profile as Record<string, unknown>)
+    clearInterval(ka3)
     const qa = await runQA('offer', offer as Record<string, unknown>)
 
     const id = randomUUID()
@@ -138,6 +171,7 @@ router.post('/offer', async (req: AuthRequest, res) => {
     res.write(`data: ${JSON.stringify({ status: 'done', result: offer, outputId: id, qa })}\n\n`)
     res.end()
   } catch (err) {
+    clearInterval(ka3)
     const msg = err instanceof Error ? err.message : 'Помилка генерації'
     res.write(`data: ${JSON.stringify({ status: 'error', error: msg })}\n\n`)
     res.end()
@@ -159,8 +193,14 @@ function sseRoute(
     res.setHeader('Cache-Control', 'no-cache')
     res.write('data: {"status":"generating"}\n\n')
 
+    // Keepalive ping every 5 s so Railway doesn't kill idle connections
+    const keepalive = setInterval(() => {
+      try { res.write(': ping\n\n') } catch { /* ignore if already closed */ }
+    }, 5000)
+
     try {
       const result = await generator(profile as Record<string, unknown>)
+      clearInterval(keepalive)
       const qa = await runQA(type, result as Record<string, unknown>)
 
       const existingCount = db.select({ id: generatedOutputs.id }).from(generatedOutputs)
@@ -178,6 +218,7 @@ function sseRoute(
       res.write(`data: ${JSON.stringify({ status: 'done', result, outputId: id, qa })}\n\n`)
       res.end()
     } catch (err) {
+      clearInterval(keepalive)
       const msg = err instanceof Error ? err.message : 'Помилка генерації'
       res.write(`data: ${JSON.stringify({ status: 'error', error: msg })}\n\n`)
       res.end()
@@ -202,6 +243,7 @@ router.post('/marketing-pack', async (req: AuthRequest, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.write('data: {"status":"generating"}\n\n')
+  const ka4 = setInterval(() => { try { res.write(': ping\n\n') } catch { /* */ } }, 5000)
 
   try {
     const allOutputs = db.select().from(generatedOutputs)
@@ -233,6 +275,7 @@ router.post('/marketing-pack', async (req: AuthRequest, res) => {
       profile as Record<string, unknown>,
       latestByType
     )
+    clearInterval(ka4)
 
     const id = randomUUID()
     db.insert(generatedOutputs).values({
@@ -249,6 +292,7 @@ router.post('/marketing-pack', async (req: AuthRequest, res) => {
     res.write(`data: ${JSON.stringify({ status: 'done', result: pack, outputId: id })}\n\n`)
     res.end()
   } catch (err) {
+    clearInterval(ka4)
     const msg = err instanceof Error ? err.message : 'Помилка генерації'
     res.write(`data: ${JSON.stringify({ status: 'error', error: msg })}\n\n`)
     res.end()

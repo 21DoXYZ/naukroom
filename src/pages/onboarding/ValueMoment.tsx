@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { ssePost } from '@/lib/sse'
+import { api } from '@/lib/api'
 
 interface Summary {
   whoYouAre: string
@@ -31,9 +32,20 @@ export default function ValueMoment() {
   const [copied, setCopied] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(() => { fetchSummary() }, [])
+  useEffect(() => { loadSummary() }, [])
 
-  async function fetchSummary() {
+  async function loadSummary() {
+    try {
+      const cached = await api.get<{ result: Summary }>('/generate/output/positioning_summary')
+      setSummary(cached.result)
+    } catch {
+      await generateSummary()
+    }
+  }
+
+  async function generateSummary() {
+    setSummary(null)
+    setError('')
     try {
       await ssePost<Summary>('/generate/positioning-summary', setSummary, setError)
     } catch (err) {
@@ -142,9 +154,12 @@ export default function ValueMoment() {
           </div>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={spring} custom={8}>
+        <motion.div initial="hidden" animate="visible" variants={spring} custom={8} className="flex items-center gap-3">
           <Button size="lg" onClick={() => navigate('/dashboard')}>
             Перейти до кабінету <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Button>
+          <Button size="lg" variant="ghost" onClick={generateSummary}>
+            Перегенерувати
           </Button>
         </motion.div>
       </div>

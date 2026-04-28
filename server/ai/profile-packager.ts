@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { buildNicheContext, GOLDEN_EXAMPLES } from './niche-context.js'
+import { cleanBio } from './utils.js'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -79,7 +80,7 @@ ${GOLDEN_EXAMPLES.badOutputPatterns}
   try {
     const result = JSON.parse(text) as ProfilePackaging
     if (Array.isArray(result.bioVariants))
-      result.bioVariants = result.bioVariants.map(b => b.slice(0, 150))
+      result.bioVariants = result.bioVariants.map(b => cleanBio(b))
     if (Array.isArray(result.profileNameVariants))
       result.profileNameVariants = result.profileNameVariants.map(n => n.slice(0, 30))
     return result

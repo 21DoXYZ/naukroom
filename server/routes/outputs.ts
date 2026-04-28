@@ -8,10 +8,17 @@ const router = Router()
 router.use(requireAuth)
 
 router.get('/', (req: AuthRequest, res) => {
-  const outputs = db.select().from(generatedOutputs)
+  const all = db.select().from(generatedOutputs)
     .where(eq(generatedOutputs.userId, req.userId!))
     .orderBy(desc(generatedOutputs.createdAt))
     .all()
+  // Deduplicate: keep only the most recent output per type
+  const seen = new Set<string>()
+  const outputs = all.filter(o => {
+    if (seen.has(o.type)) return false
+    seen.add(o.type)
+    return true
+  })
   res.json(outputs)
 })
 
