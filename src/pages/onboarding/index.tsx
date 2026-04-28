@@ -9,6 +9,7 @@ import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { type OnboardingData, TOTAL_STEPS, STEP_TITLES } from './types'
 import { AnswerImprover } from './AnswerImprover'
+import { Step0Instagram } from './Step0Instagram'
 import { Step1Identity } from './steps/Step1Identity'
 import { Step2Audience } from './steps/Step2Audience'
 import { Step3CurrentServices } from './steps/Step3CurrentServices'
@@ -38,7 +39,7 @@ const spring = {
 }
 
 export default function Onboarding() {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)
   const [approvedSteps, setApprovedSteps] = useState<Set<number>>(new Set())
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
@@ -55,10 +56,18 @@ export default function Onboarding() {
           const savedStep = profile.currentStep as number | undefined
           methods.reset(profile as Partial<OnboardingData>)
           if (savedStep) setStep(savedStep)
+          else setStep(0)
         }
       })
       .catch(() => {})
   }, [])
+
+  function handlePrefill(prefill: Record<string, string>) {
+    for (const [key, val] of Object.entries(prefill)) {
+      if (val) methods.setValue(key as keyof OnboardingData, val as never)
+    }
+    setStep(1)
+  }
 
   async function saveProgress(data: Partial<OnboardingData>) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -94,6 +103,10 @@ export default function Onboarding() {
   const improveConfig = IMPROVE_CONFIG[step]
   const improveAnswer = improveConfig ? methods.watch(improveConfig.field) as string : ''
   const isApproved = approvedSteps.has(step)
+
+  if (step === 0) {
+    return <Step0Instagram onComplete={handlePrefill} onSkip={() => setStep(1)} />
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -134,7 +147,7 @@ export default function Onboarding() {
         </AnimatePresence>
 
         <div className="flex items-center justify-between mt-10 pt-6 border-t border-black/8">
-          <Button variant="ghost" size="sm" onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1}>
+          <Button variant="ghost" size="sm" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 1}>
             <ChevronLeft className="h-4 w-4 mr-1" />
             Назад
           </Button>
